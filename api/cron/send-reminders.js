@@ -53,13 +53,20 @@ function getDaysUntil(dueDate) {
 /**
  * Get reminder kind based on days until
  */
-function getReminderKind(daysUntil) {
+function getReminderKindByMode(daysUntil, mode) {
+  // SERA: solo "domani" (d1) alle 22 del giorno prima
+  if (mode === 'evening') {
+    if (daysUntil === 1) return 'd1';
+    return null;
+  }
+
+  // MATTINO: oggi, 3 giorni, 7 giorni
   if (daysUntil === 0) return 'd0';
-  if (daysUntil === 1) return 'd1';
   if (daysUntil === 3) return 'd3';
   if (daysUntil === 7) return 'd7';
   return null;
 }
+
 
 export default async function handler(request) {
   // Verify cron secret
@@ -74,6 +81,8 @@ export default async function handler(request) {
   const url = new URL(request.url);
   const querySecret = url.searchParams.get('secret');
   const headerSecret = authHeader?.replace('Bearer ', '');
+  const mode = url.searchParams.get('mode') || 'morning';
+
 
   if (headerSecret !== cronSecret && querySecret !== cronSecret) {
     return errorResponse('Unauthorized', 401);
@@ -109,7 +118,7 @@ export default async function handler(request) {
     // Process each payment
     for (const payment of payments || []) {
       const daysUntil = getDaysUntil(payment.due_date);
-      const kind = getReminderKind(daysUntil);
+      const kind = getReminderKindByMode(daysUntil, mode);
 
       if (!kind) continue; // Not a reminder day
 
