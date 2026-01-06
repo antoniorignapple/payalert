@@ -165,14 +165,14 @@ function PaymentItem({ payment, onDelete }) {
             <span className="text-slate-400 text-xs">{formattedDate}</span>
           </div>
           <h3 className="font-semibold text-white truncate">{payment.title}</h3>
-          {payment.amount_cents && (
+          {payment.amount_cents ? (
             <p className="text-orange-400 font-medium mt-1">{centsToEuros(payment.amount_cents)}</p>
-          )}
-          {payment.notes && (
+          ) : null}
+          {payment.notes ? (
             <p className="text-slate-400 text-sm mt-1 line-clamp-2">{payment.notes}</p>
-          )}
+          ) : null}
         </div>
-        
+
         <div className="flex-shrink-0">
           {showConfirm ? (
             <div className="flex gap-1">
@@ -206,14 +206,13 @@ function PaymentItem({ payment, onDelete }) {
 
 // ============ ADD PAYMENT FORM ============
 
-function AddPaymentForm({ onAdd, isLoading }) {
+function AddPaymentForm({ onAdd }) {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [amount, setAmount] = useState('');
   const [notes, setNotes] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Set default date to today
   useEffect(() => {
     const today = new Date().toISOString().split('T')[0];
     setDueDate(today);
@@ -231,15 +230,17 @@ function AddPaymentForm({ onAdd, isLoading }) {
         amount_cents: eurosToCents(amount),
         notes: notes.trim() || null,
       });
-      // Reset form
       setTitle('');
       setAmount('');
       setNotes('');
-      // Keep date
     } finally {
       setIsSubmitting(false);
     }
   };
+
+  const inputBase =
+    "w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 " +
+    "focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all";
 
   return (
     <form onSubmit={handleSubmit} className="glass rounded-2xl p-5">
@@ -247,40 +248,49 @@ function AddPaymentForm({ onAdd, isLoading }) {
         <PlusIcon className="w-5 h-5 text-orange-400" />
         Aggiungi pagamento
       </h2>
-      
+
       <div className="space-y-3">
-        <div>
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Titolo pagamento *"
-            required
-            className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all"
-          />
-        </div>
-        
-        <div className="flex gap-3">
-          <div className="flex-1">
+        <input
+          type="text"
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="Titolo pagamento"
+          required
+          className={inputBase}
+        />
+
+        {/* FIX iOS: su mobile STACK (niente overlap), da sm in su in riga */}
+        <div className="flex flex-col sm:flex-row gap-3">
+          <div className="min-w-0 flex-1">
             <input
               type="date"
               value={dueDate}
               onChange={(e) => setDueDate(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all"
+              className={`${inputBase} appearance-none text-sm`}
             />
           </div>
-          <div className="w-28">
+
+          <div className="sm:w-36">
             <input
               type="text"
               value={amount}
               onChange={(e) => setAmount(e.target.value)}
               placeholder="€ Importo"
               inputMode="decimal"
-              className="w-full bg-white/5 border border-white/10 rounded-xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:border-orange-500/50 focus:ring-2 focus:ring-orange-500/20 transition-all"
+              className={`${inputBase} text-sm`}
             />
           </div>
         </div>
+
+        {/* (opzionale) note */}
+        {/* <textarea
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+          placeholder="Note (opzionale)"
+          rows={2}
+          className={`${inputBase} resize-none`}
+        /> */}
 
         <button
           type="submit"
@@ -312,6 +322,7 @@ function NotificationButton() {
 
   useEffect(() => {
     checkStatus();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const checkStatus = async () => {
@@ -337,7 +348,7 @@ function NotificationButton() {
       if (result.success) {
         setStatus('subscribed');
       } else {
-        if (result.message.includes('negato')) {
+        if (result.message?.includes('negato')) {
           setStatus('denied');
         }
       }
@@ -346,9 +357,7 @@ function NotificationButton() {
     }
   };
 
-  if (status === 'loading') {
-    return null;
-  }
+  if (status === 'loading') return null;
 
   if (status === 'unsupported') {
     return (
@@ -451,7 +460,6 @@ export default function App() {
 
   return (
     <div className="min-h-screen min-h-[100dvh] flex flex-col">
-      {/* Toast */}
       {toast && (
         <Toast
           message={toast.message}
@@ -462,28 +470,35 @@ export default function App() {
 
       {/* Header */}
       <header className="glass sticky top-0 z-40 border-b border-white/5">
-        <div className="max-w-lg mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center glow-sm-orange">
-                <CreditCardIcon className="w-5 h-5 text-white" />
+        {/* safe area top */}
+        <div className="max-w-lg mx-auto px-4 py-4 pt-[max(1rem,env(safe-area-inset-top))]">
+          <div className="flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 min-w-0">
+              {/* LOGO REALE */}
+              <div className="w-10 h-10 rounded-xl overflow-hidden flex-shrink-0 ring-1 ring-white/10">
+                <img
+                  src="/icon-192.png"
+                  alt="PayAlert"
+                  className="w-full h-full object-cover"
+                  draggable="false"
+                />
               </div>
-              <div>
-                <h1 className="font-display font-bold text-xl text-white">PayAlert</h1>
-                <p className="text-xs text-slate-500 font-mono">ID: {deviceId}</p>
+
+              <div className="min-w-0">
+                <h1 className="font-display font-bold text-xl text-white truncate">PayAlert</h1>
+                
               </div>
             </div>
+
             <NotificationButton />
           </div>
         </div>
       </header>
 
       {/* Main Content */}
-      <main className="flex-1 max-w-lg mx-auto w-full px-4 py-6 space-y-6 safe-bottom">
-        {/* Add Payment Form */}
-        <AddPaymentForm onAdd={handleAddPayment} isLoading={isLoading} />
+      <main className="flex-1 max-w-lg mx-auto w-full px-4 py-6 space-y-6 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
+        <AddPaymentForm onAdd={handleAddPayment} />
 
-        {/* Payments List */}
         <section>
           <div className="flex items-center justify-between mb-4">
             <h2 className="font-display font-semibold text-lg flex items-center gap-2">
@@ -494,6 +509,7 @@ export default function App() {
                 </span>
               )}
             </h2>
+
             <button
               onClick={() => loadPayments(true)}
               disabled={isRefreshing}
@@ -503,7 +519,6 @@ export default function App() {
             </button>
           </div>
 
-          {/* Error State */}
           {error && !isLoading && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-xl p-4 text-red-400 text-sm mb-4">
               <p className="font-medium">Errore di caricamento</p>
@@ -511,7 +526,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Loading State */}
           {isLoading && (
             <div className="glass rounded-xl p-8 flex flex-col items-center justify-center">
               <RefreshIcon className="w-8 h-8 text-orange-400 mb-3" spinning />
@@ -519,7 +533,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Empty State */}
           {!isLoading && !error && payments.length === 0 && (
             <div className="glass rounded-xl p-8 text-center">
               <div className="w-16 h-16 bg-white/5 rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -530,7 +543,6 @@ export default function App() {
             </div>
           )}
 
-          {/* Payments List */}
           {!isLoading && payments.length > 0 && (
             <div className="space-y-3">
               {payments.map((payment) => (
@@ -545,7 +557,6 @@ export default function App() {
         </section>
       </main>
 
-      {/* Footer */}
       <footer className="text-center py-4 text-xs text-slate-600">
         PayAlert © {new Date().getFullYear()}
       </footer>
