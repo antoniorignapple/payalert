@@ -6,29 +6,28 @@ export const config = {
   maxDuration: 10,
 };
 
-export default async function handler(request) {
+export default async function handler(request, response) {
   const cronSecret = process.env.CRON_SECRET;
   if (!cronSecret) {
-    return errorResponse('CRON_SECRET not configured', 500);
+    return response.status(500).json({ error: 'CRON_SECRET not configured' });
   }
 
-  const url = new URL(request.url);
-  const querySecret = url.searchParams.get('secret');
-  const deviceId = url.searchParams.get('device_id');
+  // Get query params from request.query (Node.js style)
+  const { secret: querySecret, device_id: deviceId } = request.query;
 
   if (querySecret !== cronSecret) {
-    return errorResponse('Unauthorized', 401);
+    return response.status(401).json({ error: 'Unauthorized' });
   }
 
   if (!deviceId) {
-    return errorResponse('device_id is required', 400);
+    return response.status(400).json({ error: 'device_id is required' });
   }
 
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
 
   if (!vapidPublicKey || !vapidPrivateKey) {
-    return errorResponse('VAPID keys not configured', 500);
+    return response.status(500).json({ error: 'VAPID keys not configured' });
   }
 
   webpush.setVapidDetails(
@@ -47,11 +46,11 @@ export default async function handler(request) {
       .maybeSingle();
 
     if (subError) {
-      return errorResponse('Database error', 500);
+      return response.status(500).json({ error: 'Database error' });
     }
 
     if (!subData?.subscription) {
-      return errorResponse('No push subscription found for this device', 404);
+      return response.status(404).json({ error: 'No push subscription found for this device' });
     }
 
     const payload = JSON.stringify({
@@ -64,7 +63,7 @@ export default async function handler(request) {
 
     await webpush.sendNotification(subData.subscription, payload);
 
-    return jsonResponse({
+    return response.status(200).json({
       success: true,
       message: 'Test notification sent!',
       device_id: deviceId,
@@ -72,6 +71,6 @@ export default async function handler(request) {
 
   } catch (err) {
     console.error('Push error:', err.message);
-    return errorResponse(`Push failed: ${err.message}`, 500);
+    return response.status(500).json({ error: `Push failed: ${err.message}` });
   }
 }
