@@ -1,12 +1,16 @@
 {
   "crons": [
     {
-      "path": "/api/cron/send-reminders?mode=morning",
-      "schedule": "0 7 * * *"
+      "path": "/api/cron/send-reminders?secret=2228220d33bb414c3b30f09abf563ec705e72d34def6c2430143d050c378e964&mode=afternoon",
+      "schedule": "0 14 * * *"
     },
     {
-      "path": "/api/cron/send-reminders?mode=evening",
-      "schedule": "15 21 * * *"
+      "path": "/api/cron/send-reminders?secret=2228220d33bb414c3b30f09abf563ec705e72d34def6c2430143d050c378e964&mode=evening",
+      "schedule": "0 19 * * *"
+    },
+    {
+      "path": "/api/cron/send-reminders?secret=2228220d33bb414c3b30f09abf563ec705e72d34def6c2430143d050c378e964&mode=morning",
+      "schedule": "0 8 * * *"
     }
   ]
 }

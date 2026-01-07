@@ -1,15 +1,11 @@
 import { getSupabase, jsonResponse, errorResponse } from '../_supabase.js';
 import webpush from 'web-push';
 
-// Use Node.js runtime (web-push requires it)
 export const config = {
   runtime: 'nodejs',
   maxDuration: 30,
 };
 
-/**
- * Calculate days until due date
- */
 function getDaysUntil(dueDate) {
   const today = new Date();
   today.setHours(0, 0, 0, 0);
@@ -18,47 +14,34 @@ function getDaysUntil(dueDate) {
   return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 }
 
-/**
- * Get reminder kind based on days until and mode
- */
 function getReminderKind(daysUntil, mode) {
-  // EVENING mode: only "tomorrow" (d1)
-  if (mode === 'evening') {
-    if (daysUntil === 1) return 'd1';
-    return null;
-  }
-
-  // MORNING mode: today, 3 days, 7 days
-  if (daysUntil === 0) return 'd0';
-  if (daysUntil === 3) return 'd3';
-  if (daysUntil === 7) return 'd7';
+  // mode: 'afternoon' (15:00), 'evening' (20:00), 'morning' (09:00)
+  
+  if (mode === 'afternoon' && daysUntil === 1) return 'd1_afternoon';
+  if (mode === 'evening' && daysUntil === 1) return 'd1_evening';
+  if (mode === 'morning' && daysUntil === 0) return 'd0_morning';
+  
   return null;
 }
 
-export default async function handler(request) {
-  // Verify cron secret
-  const authHeader = request.headers.get('authorization');
+export default async function handler(request, response) {
   const cronSecret = process.env.CRON_SECRET;
 
   if (!cronSecret) {
-    return errorResponse('CRON_SECRET not configured', 500);
+    return response.status(500).json({ error: 'CRON_SECRET not configured' });
   }
 
-  const url = new URL(request.url);
-  const querySecret = url.searchParams.get('secret');
-  const headerSecret = authHeader?.replace('Bearer ', '');
-  const mode = url.searchParams.get('mode') || 'morning';
+  const { secret: querySecret, mode = 'morning' } = request.query;
 
-  if (headerSecret !== cronSecret && querySecret !== cronSecret) {
-    return errorResponse('Unauthorized', 401);
+  if (querySecret !== cronSecret) {
+    return response.status(401).json({ error: 'Unauthorized' });
   }
 
-  // Configure web-push with VAPID keys
   const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
   const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
 
   if (!vapidPublicKey || !vapidPrivateKey) {
-    return errorResponse('VAPID keys not configured', 500);
+    return response.status(500).json({ error: 'VAPID keys not configured' });
   }
 
   webpush.setVapidDetails(
@@ -69,40 +52,31 @@ export default async function handler(request) {
 
   try {
     const supabase = getSupabase();
-    const results = {
-      checked: 0,
-      sent: 0,
-      skipped: 0,
-      errors: [],
-    };
+    const results = { checked: 0, sent: 0, skipped: 0, errors: [] };
 
-    // Get all payments with due dates in the reminder window
     const today = new Date();
-    const maxDate = new Date(today);
-    maxDate.setDate(maxDate.getDate() + 7);
+    const tomorrow = new Date(today);
+    tomorrow.setDate(tomorrow.getDate() + 1);
 
     const { data: payments, error: paymentsError } = await supabase
       .from('payments')
       .select('*')
-      .eq('is_paid', false) // Only unpaid payments
+      .eq('is_paid', false)
       .gte('due_date', today.toISOString().split('T')[0])
-      .lte('due_date', maxDate.toISOString().split('T')[0]);
+      .lte('due_date', tomorrow.toISOString().split('T')[0]);
 
     if (paymentsError) {
-      console.error('Error fetching payments:', paymentsError.message);
-      return errorResponse('Failed to fetch payments', 500);
+      return response.status(500).json({ error: 'Failed to fetch payments' });
     }
 
     results.checked = payments?.length || 0;
 
-    // Process each payment
     for (const payment of payments || []) {
       const daysUntil = getDaysUntil(payment.due_date);
       const kind = getReminderKind(daysUntil, mode);
 
       if (!kind) continue;
 
-      // Check if notification already sent
       const { data: existingLog } = await supabase
         .from('notification_log')
         .select('id')
@@ -116,7 +90,6 @@ export default async function handler(request) {
         continue;
       }
 
-      // Get push subscription for device
       const { data: subData } = await supabase
         .from('push_subscriptions')
         .select('subscription')
@@ -128,37 +101,29 @@ export default async function handler(request) {
         continue;
       }
 
-      // Prepare notification payload
-      const dueDate = new Date(payment.due_date + 'T00:00:00');
-      const formattedDate = dueDate.toLocaleDateString('it-IT', {
-        weekday: 'long',
-        day: 'numeric',
-        month: 'long',
-      });
-
       const titleMap = {
-        d7: '⏰ Promemoria pagamento',
-        d3: '⚠️ Pagamento in arrivo',
-        d1: '🔔 Pagamento domani',
-        d0: '🚨 Pagamento oggi',
+        d1_afternoon: '🔔 Pagamento domani',
+        d1_evening: '⚠️ Ricorda: pagamento domani',
+        d0_morning: '🚨 Pagamento oggi',
+      };
+
+      const bodyMap = {
+        d1_afternoon: `${payment.title} scade domani`,
+        d1_evening: `${payment.title} scade domani`,
+        d0_morning: `${payment.title} scade oggi`,
       };
 
       const payload = JSON.stringify({
         title: titleMap[kind],
-        body: `${payment.title} scade ${kind === 'd0' ? 'oggi' : formattedDate}`,
+        body: bodyMap[kind],
         icon: '/icon-192.png',
         badge: '/icon-192.png',
-        data: {
-          url: '/',
-          paymentId: payment.id,
-        },
+        data: { url: '/', paymentId: payment.id },
       });
 
       try {
-        // Send push notification
         await webpush.sendNotification(subData.subscription, payload);
 
-        // Log the sent notification
         await supabase.from('notification_log').insert({
           device_id: payment.device_id,
           payment_id: payment.id,
@@ -167,31 +132,23 @@ export default async function handler(request) {
 
         results.sent++;
       } catch (pushError) {
-        console.error('Push error:', pushError.message);
-        
-        // If subscription is invalid, remove it
         if (pushError.statusCode === 410 || pushError.statusCode === 404) {
           await supabase
             .from('push_subscriptions')
             .delete()
             .eq('device_id', payment.device_id);
         }
-
-        results.errors.push({
-          paymentId: payment.id,
-          error: pushError.message,
-        });
+        results.errors.push({ paymentId: payment.id, error: pushError.message });
       }
     }
 
-    return jsonResponse({
+    return response.status(200).json({
       success: true,
       timestamp: new Date().toISOString(),
       mode,
       results,
     });
   } catch (err) {
-    console.error('Cron error:', err.message);
-    return errorResponse('Internal server error', 500);
+    return response.status(500).json({ error: 'Internal server error' });
   }
 }
