@@ -1,43 +1,11 @@
 import { getSupabase, jsonResponse, errorResponse } from '../_supabase.js';
+import webpush from 'web-push';
 
+// Use Node.js runtime (web-push requires it)
 export const config = {
-  runtime: 'edge',
+  runtime: 'nodejs',
+  maxDuration: 30,
 };
-
-// VAPID helper for web-push
-const VAPID_SUBJECT = 'mailto:admin@payalert.app';
-
-/**
- * Send web push notification
- */
-async function sendPushNotification(subscription, payload) {
-  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
-  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
-
-  if (!vapidPublicKey || !vapidPrivateKey) {
-    throw new Error('VAPID keys not configured');
-  }
-
-  // Import web-push dynamically (not available in edge runtime natively)
-  // For Vercel Edge, we need to use the fetch API with the push endpoint directly
-  // This is a simplified implementation - for production, consider using a Node.js runtime
-
-  const response = await fetch(subscription.endpoint, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      TTL: '86400',
-      Urgency: 'normal',
-    },
-    body: JSON.stringify(payload),
-  });
-
-  if (!response.ok) {
-    throw new Error(`Push failed: ${response.status}`);
-  }
-
-  return true;
-}
 
 /**
  * Calculate days until due date
@@ -51,22 +19,21 @@ function getDaysUntil(dueDate) {
 }
 
 /**
- * Get reminder kind based on days until
+ * Get reminder kind based on days until and mode
  */
-function getReminderKindByMode(daysUntil, mode) {
-  // SERA: solo "domani" (d1) alle 22 del giorno prima
+function getReminderKind(daysUntil, mode) {
+  // EVENING mode: only "tomorrow" (d1)
   if (mode === 'evening') {
     if (daysUntil === 1) return 'd1';
     return null;
   }
 
-  // MATTINO: oggi, 3 giorni, 7 giorni
+  // MORNING mode: today, 3 days, 7 days
   if (daysUntil === 0) return 'd0';
   if (daysUntil === 3) return 'd3';
   if (daysUntil === 7) return 'd7';
   return null;
 }
-
 
 export default async function handler(request) {
   // Verify cron secret
@@ -77,16 +44,28 @@ export default async function handler(request) {
     return errorResponse('CRON_SECRET not configured', 500);
   }
 
-  // Check both Authorization header and query param (Vercel Cron uses header)
   const url = new URL(request.url);
   const querySecret = url.searchParams.get('secret');
   const headerSecret = authHeader?.replace('Bearer ', '');
   const mode = url.searchParams.get('mode') || 'morning';
 
-
   if (headerSecret !== cronSecret && querySecret !== cronSecret) {
     return errorResponse('Unauthorized', 401);
   }
+
+  // Configure web-push with VAPID keys
+  const vapidPublicKey = process.env.VAPID_PUBLIC_KEY;
+  const vapidPrivateKey = process.env.VAPID_PRIVATE_KEY;
+
+  if (!vapidPublicKey || !vapidPrivateKey) {
+    return errorResponse('VAPID keys not configured', 500);
+  }
+
+  webpush.setVapidDetails(
+    'mailto:admin@payalert.app',
+    vapidPublicKey,
+    vapidPrivateKey
+  );
 
   try {
     const supabase = getSupabase();
@@ -105,6 +84,7 @@ export default async function handler(request) {
     const { data: payments, error: paymentsError } = await supabase
       .from('payments')
       .select('*')
+      .eq('is_paid', false) // Only unpaid payments
       .gte('due_date', today.toISOString().split('T')[0])
       .lte('due_date', maxDate.toISOString().split('T')[0]);
 
@@ -118,9 +98,9 @@ export default async function handler(request) {
     // Process each payment
     for (const payment of payments || []) {
       const daysUntil = getDaysUntil(payment.due_date);
-      const kind = getReminderKindByMode(daysUntil, mode);
+      const kind = getReminderKind(daysUntil, mode);
 
-      if (!kind) continue; // Not a reminder day
+      if (!kind) continue;
 
       // Check if notification already sent
       const { data: existingLog } = await supabase
@@ -129,7 +109,7 @@ export default async function handler(request) {
         .eq('device_id', payment.device_id)
         .eq('payment_id', payment.id)
         .eq('kind', kind)
-        .single();
+        .maybeSingle();
 
       if (existingLog) {
         results.skipped++;
@@ -137,13 +117,13 @@ export default async function handler(request) {
       }
 
       // Get push subscription for device
-      const { data: subscription } = await supabase
+      const { data: subData } = await supabase
         .from('push_subscriptions')
         .select('subscription')
         .eq('device_id', payment.device_id)
-        .single();
+        .maybeSingle();
 
-      if (!subscription) {
+      if (!subData?.subscription) {
         results.skipped++;
         continue;
       }
@@ -163,7 +143,7 @@ export default async function handler(request) {
         d0: '🚨 Pagamento oggi',
       };
 
-      const payload = {
+      const payload = JSON.stringify({
         title: titleMap[kind],
         body: `${payment.title} scade ${kind === 'd0' ? 'oggi' : formattedDate}`,
         icon: '/icon-192.png',
@@ -172,11 +152,11 @@ export default async function handler(request) {
           url: '/',
           paymentId: payment.id,
         },
-      };
+      });
 
       try {
-        // Try to send push (this is simplified - see note above)
-        await sendPushNotification(subscription.subscription, payload);
+        // Send push notification
+        await webpush.sendNotification(subData.subscription, payload);
 
         // Log the sent notification
         await supabase.from('notification_log').insert({
@@ -187,6 +167,16 @@ export default async function handler(request) {
 
         results.sent++;
       } catch (pushError) {
+        console.error('Push error:', pushError.message);
+        
+        // If subscription is invalid, remove it
+        if (pushError.statusCode === 410 || pushError.statusCode === 404) {
+          await supabase
+            .from('push_subscriptions')
+            .delete()
+            .eq('device_id', payment.device_id);
+        }
+
         results.errors.push({
           paymentId: payment.id,
           error: pushError.message,
@@ -197,6 +187,7 @@ export default async function handler(request) {
     return jsonResponse({
       success: true,
       timestamp: new Date().toISOString(),
+      mode,
       results,
     });
   } catch (err) {
