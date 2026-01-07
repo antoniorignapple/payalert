@@ -74,6 +74,11 @@ export async function subscribeToNotifications() {
     // Get VAPID public key from env
     const vapidPublicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
     
+    // DEBUG: Log the key
+    console.log('VAPID from env:', vapidPublicKey);
+    console.log('Type:', typeof vapidPublicKey);
+    console.log('Length:', vapidPublicKey ? vapidPublicKey.length : 'undefined');
+    
     if (!vapidPublicKey) {
       console.error('VAPID public key not configured');
       return { success: false, message: 'Configurazione push non completa' };
