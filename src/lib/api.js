@@ -101,6 +101,34 @@ export async function createPayment({ title, due_date, amount_cents, notes }) {
 }
 
 /**
+ * Update an existing payment
+ * @param {Object} payment - Payment data
+ * @param {string} payment.id - Payment UUID
+ * @param {string} [payment.title] - Payment title
+ * @param {string} [payment.due_date] - Due date (YYYY-MM-DD)
+ * @param {number} [payment.amount_cents] - Amount in cents
+ * @param {string} [payment.notes] - Optional notes
+ * @param {boolean} [payment.is_paid] - Payment status
+ * @returns {Promise<Object>} Updated payment
+ */
+export async function updatePayment({ id, title, due_date, amount_cents, notes, is_paid }) {
+  const deviceId = getDeviceId();
+  
+  return apiFetch('/payments', {
+    method: 'PUT',
+    body: JSON.stringify({
+      id,
+      device_id: deviceId,
+      title,
+      due_date,
+      amount_cents,
+      notes,
+      is_paid,
+    }),
+  });
+}
+
+/**
  * Delete a payment
  * @param {string} paymentId - Payment UUID
  * @returns {Promise<Object>} Response
@@ -151,5 +179,3 @@ export function centsToEuros(cents) {
   if (cents === null || cents === undefined) return '';
   return (cents / 100).toFixed(2).replace('.', ',') + ' €';
 }
-
-

@@ -59,6 +59,7 @@ export default async function handler(request) {
           due_date,
           amount_cents: amount_cents || null,
           notes: notes || null,
+          is_paid: false,
         })
         .select()
         .single();
@@ -69,6 +70,44 @@ export default async function handler(request) {
       }
 
       return jsonResponse(data, 201);
+    }
+
+    // PUT /api/payments - Update payment
+    if (method === 'PUT') {
+      const body = await request.json();
+      const { id, device_id, title, due_date, amount_cents, notes, is_paid } = body;
+
+      if (!id || !device_id) {
+        return errorResponse('id and device_id are required', 400);
+      }
+
+      // Build update object with only provided fields
+      const updateData = {};
+      if (title !== undefined) updateData.title = title.trim();
+      if (due_date !== undefined) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(due_date)) {
+          return errorResponse('Invalid date format. Use YYYY-MM-DD', 400);
+        }
+        updateData.due_date = due_date;
+      }
+      if (amount_cents !== undefined) updateData.amount_cents = amount_cents;
+      if (notes !== undefined) updateData.notes = notes;
+      if (is_paid !== undefined) updateData.is_paid = is_paid;
+
+      const { data, error } = await supabase
+        .from('payments')
+        .update(updateData)
+        .eq('id', id)
+        .eq('device_id', device_id)
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Supabase error:', error.message);
+        return errorResponse('Failed to update payment', 500);
+      }
+
+      return jsonResponse(data);
     }
 
     // DELETE /api/payments?id=...&device_id=...
