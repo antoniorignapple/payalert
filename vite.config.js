@@ -8,7 +8,10 @@ export default defineConfig({
     VitePWA({
       registerType: 'autoUpdate',
       injectRegister: 'auto',
-      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'sw-push.js', 'icon.svg'],
+      includeAssets: ['favicon.ico', 'apple-touch-icon.png', 'icon-192.png', 'icon-512.png', 'icon.svg'],
+      workbox: {
+        importScripts: ['/sw-push.js']
+      },
       manifest: {
         name: 'PayAlert',
         short_name: 'PayAlert',
