@@ -6,21 +6,37 @@
    DESIGN TOKENS
    ========================= */
 :root {
-  --bg-0: #05070c;
-  --bg-1: #0b1220;
-  --bg-2: #0f172a;
+  --bg-top: #f7fbff;
+  --bg-mid: #eef7ff;
+  --bg-bottom: #f8fafc;
 
-  --glass: rgba(255, 255, 255, 0.04);
-  --glass-strong: rgba(255, 255, 255, 0.06);
-  --stroke: rgba(255, 255, 255, 0.10);
-  --stroke-soft: rgba(255, 255, 255, 0.07);
+  --surface: rgba(255, 255, 255, 0.82);
+  --surface-strong: rgba(255, 255, 255, 0.92);
+  --surface-soft: rgba(255, 255, 255, 0.68);
 
-  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --stroke: rgba(255, 255, 255, 0.82);
+  --stroke-soft: rgba(148, 163, 184, 0.18);
+  --stroke-strong: rgba(148, 163, 184, 0.28);
 
-  --accent-orange: #f97316;
-  --accent-amber: #fbbf24;
-  --success-green: #22c55e;
-  --danger-red: #ef4444;
+  --text-1: #0f172a;
+  --text-2: #334155;
+  --text-3: #64748b;
+  --text-4: #94a3b8;
+
+  --sky: #0ea5e9;
+  --cyan: #06b6d4;
+  --indigo: #6366f1;
+  --emerald: #10b981;
+  --orange: #f59e0b;
+  --red: #ef4444;
+
+  --shadow-sm: 0 8px 20px rgba(15, 23, 42, 0.06);
+  --shadow-md: 0 14px 34px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 20px 48px rgba(15, 23, 42, 0.10);
+
+  --radius-xl: 1rem;
+  --radius-2xl: 1.35rem;
+  --radius-3xl: 1.7rem;
 }
 
 /* =========================
@@ -28,140 +44,298 @@
    ========================= */
 * {
   -webkit-tap-highlight-color: transparent;
+  box-sizing: border-box;
 }
 
 html {
   scroll-behavior: smooth;
 }
 
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
 body {
-  /* Font = Manrope (già caricato in index.html + tailwind) */
-  font-family: 'Manrope', system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-
-  /* Background premium (non piatto) */
+  font-family: 'Manrope', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  color: var(--text-1);
   background:
-    radial-gradient(1200px 800px at 10% -10%, rgba(249, 115, 22, 0.18), transparent 55%),
-    radial-gradient(900px 700px at 95% 0%, rgba(59, 130, 246, 0.12), transparent 50%),
-    radial-gradient(900px 700px at 30% 120%, rgba(148, 163, 184, 0.08), transparent 55%),
-    linear-gradient(160deg, var(--bg-1) 0%, var(--bg-0) 55%, #05060a 100%);
-
+    radial-gradient(1200px 700px at -5% -10%, rgba(14, 165, 233, 0.14), transparent 55%),
+    radial-gradient(900px 620px at 105% 0%, rgba(6, 182, 212, 0.10), transparent 48%),
+    radial-gradient(820px 580px at 50% 120%, rgba(99, 102, 241, 0.07), transparent 52%),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-mid) 42%, var(--bg-bottom) 100%);
   min-height: 100vh;
   min-height: 100dvh;
-  color: #e2e8f0;
-
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
 /* =========================
-   SCROLLBAR (desktop only)
+   TYPOGRAPHY
+   ========================= */
+::selection {
+  background: rgba(14, 165, 233, 0.16);
+  color: var(--text-1);
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  letter-spacing: -0.02em;
+}
+
+/* =========================
+   SCROLLBAR
    ========================= */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 9px;
+  height: 9px;
 }
+
 ::-webkit-scrollbar-track {
-  background: rgba(255, 255, 255, 0.06);
+  background: rgba(226, 232, 240, 0.65);
   border-radius: 999px;
 }
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(148, 163, 184, 0.52);
   border-radius: 999px;
+  border: 2px solid rgba(226, 232, 240, 0.65);
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(100, 116, 139, 0.65);
 }
 
 /* =========================
-   INPUTS
+   FORM ELEMENTS
    ========================= */
-input[type="date"]::-webkit-calendar-picker-indicator {
-  filter: invert(0.85);
-  cursor: pointer;
-}
-input[type="date"] {
-  color-scheme: dark;
-}
-
-/* =========================
-   TOAST
-   ========================= */
-@keyframes toastSlideIn {
-  from {
-    transform: translateY(-14px);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-.toast-enter {
-  animation: toastSlideIn 0.25s ease-out forwards;
-}
-
-/* =========================
-   GLASS SYSTEM (migliorato)
-   ========================= */
-.glass {
-  background: var(--glass);
-  border: 1px solid var(--stroke-soft);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  box-shadow: var(--shadow);
-  border-radius: 1.25rem; /* compact, meno “puffy” */
-}
-
-.glass-strong {
-  background: var(--glass-strong);
-  border: 1px solid var(--stroke);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  box-shadow: var(--shadow);
-  border-radius: 1.25rem; /* compact, meno “puffy” */
-}
-
-/* =========================
-   GLOW (più fine)
-   ========================= */
-.glow-orange {
-  box-shadow:
-    0 0 0 1px rgba(249, 115, 22, 0.18),
-    0 12px 34px rgba(249, 115, 22, 0.12);
-}
-
-.glow-sm-orange {
-  box-shadow:
-    0 0 0 1px rgba(249, 115, 22, 0.16),
-    0 10px 22px rgba(249, 115, 22, 0.10);
-}
-
-/* =========================
-   COMPACT TUNING (finale)
-   ========================= */
-
-/* testi più “centrati” e controllati in input/bottoni */
 input,
-button {
+button,
+textarea,
+select {
+  font: inherit;
   line-height: 1.2;
 }
 
-/* micro-compattazione verticale interna dove ci sono layout a righe */
-.glass > div,
-.glass-strong > div {
-  row-gap: 0.25rem;
+input::placeholder,
+textarea::placeholder {
+  color: #94a3b8;
 }
 
-/* empty state un filo meno “alto” */
-.glass.rounded-2xl.p-8 {
-  padding-top: 1.75rem;
-  padding-bottom: 1.75rem;
+input,
+textarea,
+select {
+  appearance: none;
+  -webkit-appearance: none;
+  border-radius: 1rem;
+}
+
+input[type='date'] {
+  color-scheme: light;
+}
+
+input[type='date']::-webkit-calendar-picker-indicator {
+  opacity: 0.65;
+  cursor: pointer;
+  filter: none;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
+
+/* autofill fix */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+  -webkit-text-fill-color: var(--text-1);
+  transition: background-color 9999s ease-in-out 0s;
+  box-shadow: 0 0 0px 1000px white inset;
 }
 
 /* =========================
-   SAFE AREA (iOS)
+   TOAST ANIMATION
    ========================= */
+@keyframes toastSlideIn {
+  from {
+    transform: translateY(-14px) scale(0.985);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.toast-enter {
+  animation: toastSlideIn 0.26s ease-out forwards;
+}
+
+/* =========================
+   UTILITY SURFACES
+   ========================= */
+.glass-light {
+  background: var(--surface);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(18px);
+  -webkit-backdrop-filter: blur(18px);
+  box-shadow: var(--shadow-md);
+  border-radius: var(--radius-2xl);
+}
+
+.glass-light-strong {
+  background: var(--surface-strong);
+  border: 1px solid var(--stroke);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  box-shadow: var(--shadow-lg);
+  border-radius: var(--radius-2xl);
+}
+
+.card-soft {
+  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0.78) 100%);
+  border: 1px solid rgba(255,255,255,0.88);
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-2xl);
+}
+
+/* =========================
+   GLOW SYSTEM
+   ========================= */
+.glow-sky {
+  box-shadow:
+    0 0 0 1px rgba(14, 165, 233, 0.10),
+    0 12px 30px rgba(14, 165, 233, 0.16);
+}
+
+.glow-cyan {
+  box-shadow:
+    0 0 0 1px rgba(6, 182, 212, 0.10),
+    0 12px 30px rgba(6, 182, 212, 0.14);
+}
+
+.glow-indigo {
+  box-shadow:
+    0 0 0 1px rgba(99, 102, 241, 0.10),
+    0 12px 30px rgba(99, 102, 241, 0.14);
+}
+
+.glow-soft {
+  box-shadow:
+    0 1px 0 rgba(255, 255, 255, 0.75) inset,
+    0 14px 32px rgba(15, 23, 42, 0.08);
+}
+
+/* =========================
+   PREMIUM BACKDROP HELPERS
+   ========================= */
+.bg-premium {
+  background:
+    radial-gradient(900px 520px at 0% 0%, rgba(14, 165, 233, 0.11), transparent 54%),
+    radial-gradient(740px 460px at 100% 0%, rgba(6, 182, 212, 0.10), transparent 50%),
+    linear-gradient(180deg, #f7fbff 0%, #eef7ff 45%, #f8fafc 100%);
+}
+
+.bg-panel {
+  background: linear-gradient(180deg, rgba(255,255,255,0.88) 0%, rgba(255,255,255,0.74) 100%);
+}
+
+/* =========================
+   MICRO-INTERACTIONS
+   ========================= */
+button,
+a,
+input,
+select,
+textarea {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    box-shadow 0.22s ease,
+    transform 0.18s ease,
+    opacity 0.18s ease;
+}
+
+button:active {
+  transform: translateY(0.5px) scale(0.995);
+}
+
+@media (hover: hover) {
+  .lift-hover:hover {
+    transform: translateY(-1px);
+    box-shadow: var(--shadow-md);
+  }
+}
+
+/* =========================
+   EMPTY STATE / PANELS
+   ========================= */
+.soft-ring {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,0.75),
+    0 10px 25px rgba(15, 23, 42, 0.06);
+}
+
+/* =========================
+   MOBILE SAFE AREA
+   ========================= */
+.safe-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
-  .safe-bottom {
+  .safe-bottom-lg {
     padding-bottom: calc(1rem + env(safe-area-inset-bottom));
   }
+}
+
+/* =========================
+   REDUCED MOTION
+   ========================= */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* =========================
+   SMALL POLISH
+   ========================= */
+img {
+  user-select: none;
+  -webkit-user-drag: none;
+}
+
+hr {
+  border: 0;
+  border-top: 1px solid rgba(148, 163, 184, 0.14);
+}
+
+.text-balance {
+  text-wrap: balance;
 }
