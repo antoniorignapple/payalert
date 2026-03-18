@@ -19,7 +19,7 @@ export class ApiError extends Error {
  */
 async function apiFetch(endpoint, options = {}) {
   const url = `${API_BASE}${endpoint}`;
-  
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -30,7 +30,7 @@ async function apiFetch(endpoint, options = {}) {
 
   try {
     const response = await fetch(url, config);
-    
+
     let data;
     const contentType = response.headers.get('content-type');
     if (contentType && contentType.includes('application/json')) {
@@ -52,11 +52,7 @@ async function apiFetch(endpoint, options = {}) {
     if (error instanceof ApiError) {
       throw error;
     }
-    throw new ApiError(
-      error.message || 'Errore di rete',
-      0,
-      null
-    );
+    throw new ApiError(error.message || 'Errore di rete', 0, null);
   }
 }
 
@@ -68,7 +64,6 @@ export async function getPayments() {
   const deviceId = getDeviceId();
   try {
     const result = await apiFetch(`/payments?device_id=${encodeURIComponent(deviceId)}`);
-    // Ensure we always return an array
     return Array.isArray(result) ? result : [];
   } catch (error) {
     console.error('Failed to fetch payments:', error);
@@ -83,19 +78,27 @@ export async function getPayments() {
  * @param {string} payment.due_date - Due date (YYYY-MM-DD)
  * @param {number} [payment.amount_cents] - Amount in cents
  * @param {string} [payment.notes] - Optional notes
+ * @param {boolean} [payment.is_bank_charge] - Direct debit on bank account
  * @returns {Promise<Object>} Created payment
  */
-export async function createPayment({ title, due_date, amount_cents, notes }) {
+export async function createPayment({
+  title,
+  due_date,
+  amount_cents,
+  notes,
+  is_bank_charge,
+}) {
   const deviceId = getDeviceId();
-  
+
   return apiFetch('/payments', {
     method: 'POST',
     body: JSON.stringify({
       device_id: deviceId,
       title,
       due_date,
-      amount_cents: amount_cents || null,
+      amount_cents: amount_cents ?? null,
       notes: notes || null,
+      is_bank_charge: Boolean(is_bank_charge),
     }),
   });
 }
@@ -106,14 +109,21 @@ export async function createPayment({ title, due_date, amount_cents, notes }) {
  * @param {string} payment.id - Payment UUID
  * @param {string} [payment.title] - Payment title
  * @param {string} [payment.due_date] - Due date (YYYY-MM-DD)
- * @param {number} [payment.amount_cents] - Amount in cents
+ * @param {number|null} [payment.amount_cents] - Amount in cents
  * @param {string} [payment.notes] - Optional notes
- * @param {boolean} [payment.is_paid] - Payment status
+ * @param {boolean} [payment.is_bank_charge] - Direct debit on bank account
  * @returns {Promise<Object>} Updated payment
  */
-export async function updatePayment({ id, title, due_date, amount_cents, notes, is_paid }) {
+export async function updatePayment({
+  id,
+  title,
+  due_date,
+  amount_cents,
+  notes,
+  is_bank_charge,
+}) {
   const deviceId = getDeviceId();
-  
+
   return apiFetch('/payments', {
     method: 'PUT',
     body: JSON.stringify({
@@ -123,7 +133,7 @@ export async function updatePayment({ id, title, due_date, amount_cents, notes, 
       due_date,
       amount_cents,
       notes,
-      is_paid,
+      is_bank_charge,
     }),
   });
 }
@@ -135,10 +145,13 @@ export async function updatePayment({ id, title, due_date, amount_cents, notes, 
  */
 export async function deletePayment(paymentId) {
   const deviceId = getDeviceId();
-  
-  return apiFetch(`/payments?id=${encodeURIComponent(paymentId)}&device_id=${encodeURIComponent(deviceId)}`, {
-    method: 'DELETE',
-  });
+
+  return apiFetch(
+    `/payments?id=${encodeURIComponent(paymentId)}&device_id=${encodeURIComponent(deviceId)}`,
+    {
+      method: 'DELETE',
+    }
+  );
 }
 
 /**
@@ -148,7 +161,7 @@ export async function deletePayment(paymentId) {
  */
 export async function subscribePush(subscription) {
   const deviceId = getDeviceId();
-  
+
   return apiFetch('/push/subscribe', {
     method: 'POST',
     body: JSON.stringify({

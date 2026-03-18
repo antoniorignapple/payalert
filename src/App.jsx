@@ -523,12 +523,12 @@ function AddPaymentForm({ onAdd }) {
           </div>
 
           <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 cursor-pointer hover:bg-slate-50 transition">
-            <input
-              type="checkbox"
-              checked={isBankCharge}
-              onChange={(e) => setIsBankCharge(e.target.checked)}
-              className="w-5 h-5 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500"
-            />
+     <input
+  type="checkbox"
+  checked={isBankCharge}
+  onChange={(e) => setIsBankCharge(e.target.checked)}
+  className="h-5 w-5 shrink-0 cursor-pointer accent-sky-600"
+/>
             <div className="flex items-center gap-2">
               <BankIcon className="w-5 h-5 text-sky-600" />
               <span className="font-semibold text-slate-800">Addebito diretto su c/c</span>
