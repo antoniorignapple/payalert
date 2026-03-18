@@ -127,12 +127,22 @@ textarea::placeholder {
   color: #94a3b8;
 }
 
-input,
+/* Non toccare checkbox e radio */
+input:not([type='checkbox']):not([type='radio']),
 textarea,
 select {
   appearance: none;
   -webkit-appearance: none;
   border-radius: 1rem;
+}
+
+/* Checkbox e radio: aspetto nativo attivo */
+input[type='checkbox'],
+input[type='radio'] {
+  appearance: auto;
+  -webkit-appearance: auto;
+  accent-color: var(--sky);
+  cursor: pointer;
 }
 
 input[type='date'] {
