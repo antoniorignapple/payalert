@@ -126,33 +126,31 @@ function ChevronDownIcon({ className = 'w-5 h-5' }) {
   );
 }
 
-function CheckSquareIcon({ className = 'w-5 h-5', checked = false }) {
-  if (checked) {
-    return (
-      <svg className={className} fill="currentColor" viewBox="0 0 24 24">
-        <path d="M19 3H5a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2V5a2 2 0 00-2-2zm-9 14l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z" />
-      </svg>
-    );
-  }
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M5 3h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2z" />
-    </svg>
-  );
-}
-
-function SearchIcon({ className = 'w-5 h-5' }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-4.35-4.35m1.85-5.15a7 7 0 11-14 0 7 7 0 0114 0z" />
-    </svg>
-  );
-}
-
 function SparklesIcon({ className = 'w-5 h-5' }) {
   return (
     <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904 9 18l-.813-2.096a2 2 0 00-1.09-1.09L5 14l2.096-.813a2 2 0 001.09-1.09L9 10l.813 2.096a2 2 0 001.09 1.09L13 14l-2.096.813a2 2 0 00-1.09 1.09ZM18 8l.5 1.5L20 10l-1.5.5L18 12l-.5-1.5L16 10l1.5-.5L18 8ZM17 16l.75 2.25L20 19l-2.25.75L17 22l-.75-2.25L14 19l2.25-.75L17 16Z" />
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M9.813 15.904 9 18l-.813-2.096a2 2 0 00-1.09-1.09L5 14l2.096-.813a2 2 0 001.09-1.09L9 10l.813 2.096a2 2 0 001.09 1.09L13 14l-2.096.813a2 2 0 00-1.09 1.09ZM18 8l.5 1.5L20 10l-1.5.5L18 12l-.5-1.5L16 10l1.5-.5L18 8ZM17 16l.75 2.25L20 19l-2.25.75L17 22l-.75-2.25L14 19l2.25-.75L17 16Z"
+      />
+    </svg>
+  );
+}
+
+function BankIcon({ className = 'w-5 h-5' }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5 12 4l9 6.5M4.5 10.5h15M6 10.5V18m4-7.5V18m4-7.5V18m4-7.5V18M4 20h16" />
+    </svg>
+  );
+}
+
+function CashIcon({ className = 'w-5 h-5' }) {
+  return (
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
+      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.5A2.25 2.25 0 0 1 4.5 5.25h15A2.25 2.25 0 0 1 21.75 7.5v9A2.25 2.25 0 0 1 19.5 18.75h-15A2.25 2.25 0 0 1 2.25 16.5v-9Z" />
+      <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h.008v.008H6V12Zm12 0h.008v.008H18V12ZM12 15.75c1.657 0 3-1.679 3-3.75s-1.343-3.75-3-3.75-3 1.679-3 3.75 1.343 3.75 3 3.75Z" />
     </svg>
   );
 }
@@ -178,19 +176,6 @@ function parseLocalDate(dateString) {
   return new Date(`${dateString}T00:00:00`);
 }
 
-function getTodayStart() {
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  return today;
-}
-
-function getDaysUntil(dueDateString) {
-  const dueDate = parseLocalDate(dueDateString);
-  const today = getTodayStart();
-  const diffTime = dueDate - today;
-  return Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-}
-
 function getMonthKey(dateString) {
   const date = parseLocalDate(dateString);
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
@@ -210,56 +195,29 @@ function sortPaymentsByDate(items) {
   });
 }
 
-function getStatusTone(payment) {
-  const daysUntil = getDaysUntil(payment.due_date);
+function formatSignedCurrency(cents) {
+  const abs = Math.abs(cents);
+  const formatted = centsToEuros(abs);
+  return cents >= 0 ? `+ ${formatted}` : `- ${formatted}`;
+}
 
-  if (payment.is_paid) {
-    return {
-      badge: 'Pagato',
-      badgeClass: 'bg-emerald-100 text-emerald-700 border border-emerald-200',
-      cardClass: 'border-emerald-200/80 bg-white',
-      amountClass: 'text-emerald-700',
-      titleClass: 'text-slate-500 line-through',
-    };
+function safeLoadNumber(key, defaultValue = 0) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return defaultValue;
+    const parsed = Number(raw);
+    return Number.isFinite(parsed) ? parsed : defaultValue;
+  } catch {
+    return defaultValue;
   }
+}
 
-  if (daysUntil < 0) {
-    return {
-      badge: 'Scaduto',
-      badgeClass: 'bg-red-100 text-red-700 border border-red-200',
-      cardClass: 'border-red-200 bg-red-50/60',
-      amountClass: 'text-red-700',
-      titleClass: 'text-slate-900',
-    };
+function saveNumber(key, value) {
+  try {
+    localStorage.setItem(key, String(value));
+  } catch {
+    // ignore
   }
-
-  if (daysUntil === 0) {
-    return {
-      badge: 'Oggi',
-      badgeClass: 'bg-orange-100 text-orange-700 border border-orange-200',
-      cardClass: 'border-orange-200 bg-orange-50/70',
-      amountClass: 'text-orange-700',
-      titleClass: 'text-slate-900',
-    };
-  }
-
-  if (daysUntil <= 7) {
-    return {
-      badge: `${daysUntil}g`,
-      badgeClass: 'bg-amber-100 text-amber-700 border border-amber-200',
-      cardClass: 'border-amber-200 bg-amber-50/60',
-      amountClass: 'text-amber-700',
-      titleClass: 'text-slate-900',
-    };
-  }
-
-  return {
-    badge: `${daysUntil}g`,
-    badgeClass: 'bg-slate-100 text-slate-700 border border-slate-200',
-    cardClass: 'border-slate-200 bg-white',
-    amountClass: 'text-sky-700',
-    titleClass: 'text-slate-900',
-  };
 }
 
 // ==================== UI BASE ====================
@@ -269,21 +227,6 @@ function Surface({ className = '', children }) {
     <div className={`rounded-2xl border border-white/70 bg-white/80 backdrop-blur shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${className}`}>
       {children}
     </div>
-  );
-}
-
-function PillButton({ active, children, ...props }) {
-  return (
-    <button
-      {...props}
-      className={`px-3 py-2 rounded-xl text-sm font-semibold transition-all ${
-        active
-          ? 'bg-slate-900 text-white shadow-sm'
-          : 'bg-white text-slate-700 border border-slate-200 hover:bg-slate-50'
-      } ${props.className || ''}`}
-    >
-      {children}
-    </button>
   );
 }
 
@@ -311,436 +254,6 @@ function Toast({ message, type = 'info', onClose }) {
         </button>
       </div>
     </div>
-  );
-}
-
-// ==================== STATUS BADGE ====================
-
-function StatusBadge({ payment }) {
-  const tone = getStatusTone(payment);
-  return (
-    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${tone.badgeClass}`}>
-      {tone.badge}
-    </span>
-  );
-}
-
-// ==================== MODAL ====================
-
-function EditModal({ payment, onSave, onClose }) {
-  const [title, setTitle] = useState(payment.title);
-  const [dueDate, setDueDate] = useState(payment.due_date);
-  const [amount, setAmount] = useState(
-    payment.amount_cents ? (payment.amount_cents / 100).toString().replace('.', ',') : ''
-  );
-  const [isSaving, setIsSaving] = useState(false);
-  const [localError, setLocalError] = useState('');
-
-  const inputBase =
-    'w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100';
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title.trim() || !dueDate || isSaving) return;
-
-    setIsSaving(true);
-    setLocalError('');
-
-    try {
-      await onSave({
-        id: payment.id,
-        title: title.trim(),
-        due_date: dueDate,
-        amount_cents: eurosToCents(amount),
-      });
-      onClose();
-    } catch (err) {
-      setLocalError(err?.message || 'Errore durante il salvataggio');
-    } finally {
-      setIsSaving(false);
-    }
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl border border-white/80 p-5" onClick={(e) => e.stopPropagation()}>
-        <div className="flex items-center justify-between mb-5">
-          <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-sky-500 font-bold">Modifica</p>
-            <h2 className="text-xl font-black text-slate-900 mt-1">Aggiorna pagamento</h2>
-          </div>
-          <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
-            <XIcon className="w-5 h-5" />
-          </button>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Descrizione"
-            required
-            className={inputBase}
-          />
-
-          <input
-            type="text"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Importo €"
-            inputMode="decimal"
-            pattern="[0-9]+([,\.][0-9]{1,2})?"
-            className={inputBase}
-          />
-
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
-            className={inputBase}
-          />
-
-          {localError ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3">
-              {localError}
-            </div>
-          ) : null}
-
-          <div className="grid grid-cols-2 gap-3 pt-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition"
-            >
-              Annulla
-            </button>
-
-            <button
-              type="submit"
-              disabled={isSaving || !title.trim() || !dueDate}
-              className="rounded-2xl px-4 py-3 font-semibold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-sky-200"
-            >
-              {isSaving ? <RefreshIcon className="w-5 h-5" spinning /> : <CheckIcon className="w-5 h-5" />}
-              Salva
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
-}
-
-// ==================== PAYMENT ITEM ====================
-
-function PaymentItem({ payment, onDelete, onUpdate }) {
-  const [isDeleting, setIsDeleting] = useState(false);
-  const [showConfirm, setShowConfirm] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-  const [isToggling, setIsToggling] = useState(false);
-
-  const dueDate = parseLocalDate(payment.due_date);
-  const formattedDate = dueDate.toLocaleDateString('it-IT', {
-    weekday: 'short',
-    day: 'numeric',
-    month: 'short',
-  });
-
-  const tone = getStatusTone(payment);
-
-  const handleDelete = async () => {
-    if (isDeleting) return;
-    setIsDeleting(true);
-    try {
-      await onDelete(payment.id);
-    } finally {
-      setIsDeleting(false);
-      setShowConfirm(false);
-    }
-  };
-
-  const handleTogglePaid = async () => {
-    if (isToggling) return;
-    setIsToggling(true);
-    try {
-      await onUpdate({ id: payment.id, is_paid: !payment.is_paid });
-    } finally {
-      setIsToggling(false);
-    }
-  };
-
-  return (
-    <>
-      <div className={`rounded-2xl border p-4 shadow-sm transition-all ${tone.cardClass}`}>
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0 flex-1">
-            <div className="flex flex-wrap items-center gap-2 mb-2">
-              <StatusBadge payment={payment} />
-              <span className="text-xs font-medium text-slate-500 capitalize">{formattedDate}</span>
-            </div>
-
-            <h3 className={`text-[15px] font-bold truncate ${tone.titleClass}`}>{payment.title}</h3>
-
-            {payment.amount_cents ? (
-              <p className={`mt-1 text-sm font-extrabold ${tone.amountClass}`}>
-                {centsToEuros(payment.amount_cents)}
-              </p>
-            ) : (
-              <p className="mt-1 text-sm text-slate-400">Importo non inserito</p>
-            )}
-          </div>
-
-          <div className="flex flex-col items-end gap-2 shrink-0">
-            {!showConfirm ? (
-              <div className="flex items-center gap-1">
-                <button
-                  onClick={() => setShowEdit(true)}
-                  className="p-2 rounded-xl text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition"
-                  title="Modifica"
-                >
-                  <EditIcon className="w-4 h-4" />
-                </button>
-
-                <button
-                  onClick={() => setShowConfirm(true)}
-                  className="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
-                  title="Elimina"
-                >
-                  <TrashIcon className="w-4 h-4" />
-                </button>
-              </div>
-            ) : (
-              <div className="rounded-2xl border border-red-200 bg-white p-2">
-                <p className="text-[11px] font-semibold text-red-700 mb-2 px-1">Eliminare?</p>
-                <div className="flex gap-1">
-                  <button
-                    onClick={handleDelete}
-                    disabled={isDeleting}
-                    className="p-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition"
-                  >
-                    <CheckIcon className="w-4 h-4" />
-                  </button>
-                  <button
-                    onClick={() => setShowConfirm(false)}
-                    className="p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
-                  >
-                    <XIcon className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
-            )}
-
-            <button
-              onClick={handleTogglePaid}
-              disabled={isToggling}
-              className={`p-2 rounded-xl transition ${
-                payment.is_paid
-                  ? 'text-emerald-600 bg-emerald-50 hover:bg-emerald-100'
-                  : 'text-slate-500 bg-white hover:bg-slate-50 border border-slate-200'
-              }`}
-              title={payment.is_paid ? 'Segna come non pagato' : 'Segna come pagato'}
-            >
-              <CheckSquareIcon className="w-5 h-5" checked={payment.is_paid} />
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {showEdit ? (
-        <EditModal
-          payment={payment}
-          onSave={onUpdate}
-          onClose={() => setShowEdit(false)}
-        />
-      ) : null}
-    </>
-  );
-}
-
-// ==================== MONTH GROUP ====================
-
-function MonthGroup({ monthKey, payments, onDelete, onUpdate }) {
-  const currentMonthKey = getCurrentMonthKey();
-  const [year, month] = monthKey.split('-');
-  const monthName = monthNames[parseInt(month, 10) - 1];
-
-  const hasUrgent = payments.some((p) => !p.is_paid && getDaysUntil(p.due_date) <= 7);
-  const defaultExpanded = monthKey <= currentMonthKey || hasUrgent;
-  const [isExpanded, setIsExpanded] = useState(defaultExpanded);
-
-  const totalPaid = payments
-    .filter((p) => p.is_paid && p.amount_cents)
-    .reduce((sum, p) => sum + p.amount_cents, 0);
-
-  const totalToPay = payments
-    .filter((p) => !p.is_paid && p.amount_cents)
-    .reduce((sum, p) => sum + p.amount_cents, 0);
-
-  const unpaidCount = payments.filter((p) => !p.is_paid).length;
-
-  return (
-    <div className="mb-4">
-      <button
-        onClick={() => setIsExpanded((v) => !v)}
-        className="w-full text-left rounded-3xl border border-white/80 bg-white/80 backdrop-blur p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] hover:bg-white transition"
-      >
-        <div className="flex items-center justify-between gap-3">
-          <div className="flex items-start gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700 flex items-center justify-center shrink-0">
-              <ChevronDownIcon className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
-            </div>
-
-            <div className="min-w-0">
-              <h3 className="text-[1.05rem] font-black text-slate-900 tracking-tight">
-                {monthName} {year}
-              </h3>
-
-              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-1 text-xs">
-                <span className="text-slate-500">{payments.length} pagament{payments.length === 1 ? 'o' : 'i'}</span>
-                {unpaidCount > 0 ? (
-                  <span className="text-orange-600 font-semibold">{unpaidCount} da pagare</span>
-                ) : (
-                  <span className="text-emerald-600 font-semibold">Tutto pagato</span>
-                )}
-              </div>
-            </div>
-          </div>
-
-          <div className="text-right shrink-0">
-            {totalToPay > 0 ? (
-              <p className="text-sm font-extrabold text-orange-600">{centsToEuros(totalToPay)}</p>
-            ) : (
-              <p className="text-sm font-extrabold text-emerald-600">OK</p>
-            )}
-            <p className="text-[11px] text-slate-400">da pagare</p>
-          </div>
-        </div>
-      </button>
-
-      {isExpanded ? (
-        <div className="mt-3 pl-1 space-y-2">
-          {payments.map((payment) => (
-            <PaymentItem
-              key={payment.id}
-              payment={payment}
-              onDelete={onDelete}
-              onUpdate={onUpdate}
-            />
-          ))}
-
-          {(totalPaid > 0 || totalToPay > 0) && (
-            <div className="rounded-2xl border border-slate-200 bg-white/85 px-4 py-3 flex flex-wrap gap-x-5 gap-y-2 text-sm shadow-sm">
-              {totalPaid > 0 ? (
-                <span className="text-emerald-700 font-semibold">
-                  ✓ Pagato: <strong>{centsToEuros(totalPaid)}</strong>
-                </span>
-              ) : null}
-              {totalToPay > 0 ? (
-                <span className="text-orange-700 font-semibold">
-                  ○ Da pagare: <strong>{centsToEuros(totalToPay)}</strong>
-                </span>
-              ) : null}
-            </div>
-          )}
-        </div>
-      ) : null}
-    </div>
-  );
-}
-
-// ==================== ADD PAYMENT FORM ====================
-
-function AddPaymentForm({ onAdd }) {
-  const [title, setTitle] = useState('');
-  const [dueDate, setDueDate] = useState('');
-  const [amount, setAmount] = useState('');
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const titleRef = useRef(null);
-
-  useEffect(() => {
-    setDueDate(new Date().toISOString().split('T')[0]);
-  }, []);
-
-  const inputBase =
-    'w-full rounded-2xl border border-white/80 bg-white/90 px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100';
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!title.trim() || !dueDate || isSubmitting) return;
-
-    setIsSubmitting(true);
-    try {
-      await onAdd({
-        title: title.trim(),
-        due_date: dueDate,
-        amount_cents: eurosToCents(amount),
-        notes: null,
-      });
-      setTitle('');
-      setAmount('');
-      titleRef.current?.focus();
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  return (
-    <Surface className="p-4 md:p-5 overflow-hidden relative">
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-sky-100/70 via-cyan-100/50 to-indigo-100/70 pointer-events-none" />
-
-      <div className="relative">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-sky-200">
-            <PlusIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-sky-600 font-bold">Nuovo pagamento</p>
-            <h2 className="text-lg font-black text-slate-900">Aggiungi una scadenza</h2>
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-[1.25fr_0.75fr] gap-3">
-          <input
-            ref={titleRef}
-            type="text"
-            value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            placeholder="Descrizione"
-            required
-            className={inputBase}
-          />
-
-          <input
-            type="text"
-            value={amount}
-            onChange={(e) => setAmount(e.target.value)}
-            placeholder="Importo €"
-            inputMode="decimal"
-            pattern="[0-9]+([,\.][0-9]{1,2})?"
-            className={inputBase}
-          />
-
-          <input
-            type="date"
-            value={dueDate}
-            onChange={(e) => setDueDate(e.target.value)}
-            required
-            className={inputBase}
-          />
-
-          <button
-            type="submit"
-            disabled={isSubmitting || !title.trim() || !dueDate}
-            className="rounded-2xl px-4 py-3 font-bold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-sky-200"
-          >
-            {isSubmitting ? <RefreshIcon className="w-5 h-5" spinning /> : <CheckIcon className="w-5 h-5" />}
-            Salva
-          </button>
-        </form>
-      </div>
-    </Surface>
   );
 }
 
@@ -825,57 +338,580 @@ function NotificationButton() {
   );
 }
 
-// ==================== FILTER BAR ====================
+// ==================== SALVADANAI ====================
 
-function FilterBar({
-  filter,
-  setFilter,
-  search,
-  setSearch,
-  totalVisible,
-  totalAll,
-}) {
+function WalletCard({ label, icon, value, onChange, colorClasses }) {
+  const [draft, setDraft] = useState(value ? (value / 100).toString().replace('.', ',') : '');
+
+  useEffect(() => {
+    setDraft(value ? (value / 100).toString().replace('.', ',') : '');
+  }, [value]);
+
+  const handleSave = () => {
+    onChange(eurosToCents(draft));
+  };
+
   return (
-    <Surface className="p-3">
-      <div className="flex flex-col gap-3">
-        <div className="relative">
-          <SearchIcon className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-          <input
-            type="text"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Cerca descrizione..."
-            className="w-full rounded-2xl border border-slate-200 bg-white pl-10 pr-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+    <div className="rounded-2xl border border-white/80 bg-white/90 px-4 py-3 shadow-sm">
+      <div className="flex items-center gap-3">
+        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${colorClasses}`}>
+          {icon}
+        </div>
+
+        <div className="min-w-0 flex-1">
+          <p className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold mb-1">
+            {label}
+          </p>
+
+          <div className="flex items-center gap-2">
+            <input
+              type="text"
+              value={draft}
+              onChange={(e) => setDraft(e.target.value)}
+              placeholder="0,00"
+              inputMode="decimal"
+              pattern="[0-9]+([,\.][0-9]{1,2})?"
+              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 font-bold outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
+            />
+
+            <button
+              type="button"
+              onClick={handleSave}
+              className="rounded-2xl px-4 py-2.5 font-semibold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 transition shadow-lg shadow-sky-200 whitespace-nowrap"
+            >
+              Salva
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function SavingsSection({ cashCents, bankCents, onChangeCash, onChangeBank }) {
+  return (
+    <Surface className="p-4 md:p-5 overflow-hidden relative">
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-emerald-100/60 via-sky-100/50 to-cyan-100/60" />
+
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-emerald-200">
+            <SparklesIcon className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-sky-600 font-bold">Salvadanaio</p>
+            <h2 className="text-lg font-black text-slate-900">Disponibilità accantonata</h2>
+          </div>
+        </div>
+
+        <div className="space-y-3">
+          <WalletCard
+            label="Contante"
+            value={cashCents}
+            onChange={onChangeCash}
+            icon={<CashIcon className="w-5 h-5" />}
+            colorClasses="bg-emerald-50 text-emerald-700 border border-emerald-100"
           />
-        </div>
 
-        <div className="flex flex-wrap gap-2">
-          <PillButton active={filter === 'all'} onClick={() => setFilter('all')}>
-            Tutti
-          </PillButton>
-          <PillButton active={filter === 'unpaid'} onClick={() => setFilter('unpaid')}>
-            Da pagare
-          </PillButton>
-          <PillButton active={filter === 'paid'} onClick={() => setFilter('paid')}>
-            Pagati
-          </PillButton>
-          <PillButton active={filter === 'overdue'} onClick={() => setFilter('overdue')}>
-            Scaduti
-          </PillButton>
-          <PillButton active={filter === 'today'} onClick={() => setFilter('today')}>
-            Oggi
-          </PillButton>
-          <PillButton active={filter === 'week'} onClick={() => setFilter('week')}>
-            7 giorni
-          </PillButton>
-        </div>
-
-        <div className="text-xs text-slate-500 font-medium">
-          Visualizzati <span className="text-slate-900 font-bold">{totalVisible}</span> su{' '}
-          <span className="text-slate-900 font-bold">{totalAll}</span>
+          <WalletCard
+            label="Conto corrente"
+            value={bankCents}
+            onChange={onChangeBank}
+            icon={<BankIcon className="w-5 h-5" />}
+            colorClasses="bg-sky-50 text-sky-700 border border-sky-100"
+          />
         </div>
       </div>
     </Surface>
+  );
+}
+
+// ==================== ADD PAYMENT FORM ====================
+
+function AddPaymentForm({ onAdd }) {
+  const [title, setTitle] = useState('');
+  const [dueDate, setDueDate] = useState('');
+  const [amount, setAmount] = useState('');
+  const [isBankCharge, setIsBankCharge] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const titleRef = useRef(null);
+
+  useEffect(() => {
+    setDueDate(new Date().toISOString().split('T')[0]);
+  }, []);
+
+  const inputBase =
+    'w-full rounded-2xl border border-white/80 bg-white/90 px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100';
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!title.trim() || !dueDate || isSubmitting) return;
+
+    setIsSubmitting(true);
+    try {
+      await onAdd({
+        title: title.trim(),
+        due_date: dueDate,
+        amount_cents: eurosToCents(amount),
+        notes: null,
+        is_bank_charge: isBankCharge,
+      });
+
+      setTitle('');
+      setAmount('');
+      setIsBankCharge(false);
+      titleRef.current?.focus();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Surface className="p-4 md:p-5 overflow-hidden relative">
+      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-sky-100/70 via-cyan-100/50 to-indigo-100/70 pointer-events-none" />
+
+      <div className="relative">
+        <div className="flex items-center gap-3 mb-4">
+          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-sky-200">
+            <PlusIcon className="w-5 h-5" />
+          </div>
+          <div>
+            <p className="text-xs uppercase tracking-[0.18em] text-sky-600 font-bold">Nuovo pagamento</p>
+            <h2 className="text-lg font-black text-slate-900">Aggiungi una scadenza</h2>
+          </div>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <div className="grid grid-cols-1 sm:grid-cols-[1.25fr_0.75fr] gap-3">
+            <input
+              ref={titleRef}
+              type="text"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Descrizione"
+              required
+              className={inputBase}
+            />
+
+            <input
+              type="text"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              placeholder="Importo €"
+              inputMode="decimal"
+              pattern="[0-9]+([,\.][0-9]{1,2})?"
+              className={inputBase}
+            />
+
+            <input
+              type="date"
+              value={dueDate}
+              onChange={(e) => setDueDate(e.target.value)}
+              required
+              className={inputBase}
+            />
+
+            <button
+              type="submit"
+              disabled={isSubmitting || !title.trim() || !dueDate}
+              className="rounded-2xl px-4 py-3 font-bold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-sky-200"
+            >
+              {isSubmitting ? <RefreshIcon className="w-5 h-5" spinning /> : <CheckIcon className="w-5 h-5" />}
+              Salva
+            </button>
+          </div>
+
+          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 cursor-pointer hover:bg-slate-50 transition">
+            <input
+              type="checkbox"
+              checked={isBankCharge}
+              onChange={(e) => setIsBankCharge(e.target.checked)}
+              className="w-5 h-5 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500"
+            />
+            <div className="flex items-center gap-2">
+              <BankIcon className="w-5 h-5 text-sky-600" />
+              <span className="font-semibold text-slate-800">Addebito diretto su c/c</span>
+            </div>
+          </label>
+        </form>
+      </div>
+    </Surface>
+  );
+}
+
+// ==================== EDIT MODAL ====================
+
+function EditModal({ payment, onSave, onClose }) {
+  const [title, setTitle] = useState(payment.title);
+  const [dueDate, setDueDate] = useState(payment.due_date);
+  const [amount, setAmount] = useState(payment.amount_cents ? (payment.amount_cents / 100).toString().replace('.', ',') : '');
+  const [isBankCharge, setIsBankCharge] = useState(Boolean(payment.is_bank_charge));
+  const [isSaving, setIsSaving] = useState(false);
+  const [localError, setLocalError] = useState('');
+
+  const inputBase =
+    'w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100';
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!title.trim() || !dueDate || isSaving) return;
+
+    setIsSaving(true);
+    setLocalError('');
+
+    try {
+      await onSave({
+        id: payment.id,
+        title: title.trim(),
+        due_date: dueDate,
+        amount_cents: eurosToCents(amount),
+        is_bank_charge: isBankCharge,
+      });
+      onClose();
+    } catch (err) {
+      setLocalError(err?.message || 'Errore durante il salvataggio');
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
+      <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl border border-white/80 p-5" onClick={(e) => e.stopPropagation()}>
+        <div className="flex items-center justify-between mb-5">
+          <div>
+            <p className="text-xs uppercase tracking-[0.2em] text-sky-500 font-bold">Modifica</p>
+            <h2 className="text-xl font-black text-slate-900 mt-1">Aggiorna pagamento</h2>
+          </div>
+          <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
+            <XIcon className="w-5 h-5" />
+          </button>
+        </div>
+
+        <form onSubmit={handleSubmit} className="space-y-3">
+          <input
+            type="text"
+            value={title}
+            onChange={(e) => setTitle(e.target.value)}
+            placeholder="Descrizione"
+            required
+            className={inputBase}
+          />
+
+          <input
+            type="text"
+            value={amount}
+            onChange={(e) => setAmount(e.target.value)}
+            placeholder="Importo €"
+            inputMode="decimal"
+            pattern="[0-9]+([,\.][0-9]{1,2})?"
+            className={inputBase}
+          />
+
+          <input
+            type="date"
+            value={dueDate}
+            onChange={(e) => setDueDate(e.target.value)}
+            required
+            className={inputBase}
+          />
+
+          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 cursor-pointer hover:bg-slate-50 transition">
+            <input
+              type="checkbox"
+              checked={isBankCharge}
+              onChange={(e) => setIsBankCharge(e.target.checked)}
+              className="w-5 h-5 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500"
+            />
+            <div className="flex items-center gap-2">
+              <BankIcon className="w-5 h-5 text-sky-600" />
+              <span className="font-semibold text-slate-800">Addebito diretto su c/c</span>
+            </div>
+          </label>
+
+          {localError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3">
+              {localError}
+            </div>
+          ) : null}
+
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <button
+              type="button"
+              onClick={onClose}
+              className="rounded-2xl border border-slate-200 bg-white px-4 py-3 font-semibold text-slate-700 hover:bg-slate-50 transition"
+            >
+              Annulla
+            </button>
+
+            <button
+              type="submit"
+              disabled={isSaving || !title.trim() || !dueDate}
+              className="rounded-2xl px-4 py-3 font-semibold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-sky-200"
+            >
+              {isSaving ? <RefreshIcon className="w-5 h-5" spinning /> : <CheckIcon className="w-5 h-5" />}
+              Salva
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+// ==================== PAYMENT ITEM ====================
+
+function PaymentItem({ payment, onDelete, onUpdate }) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showEdit, setShowEdit] = useState(false);
+
+  const dueDate = parseLocalDate(payment.due_date);
+  const formattedDate = dueDate.toLocaleDateString('it-IT', {
+    weekday: 'short',
+    day: 'numeric',
+    month: 'short',
+  });
+
+  const handleDelete = async () => {
+    if (isDeleting) return;
+    setIsDeleting(true);
+    try {
+      await onDelete(payment.id);
+    } finally {
+      setIsDeleting(false);
+      setShowConfirm(false);
+    }
+  };
+
+  return (
+    <>
+      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0 flex-1">
+            <div className="flex flex-wrap items-center gap-2 mb-2">
+              <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200 capitalize">
+                {formattedDate}
+              </span>
+
+              {payment.is_bank_charge ? (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 flex items-center gap-1">
+                  <BankIcon className="w-3.5 h-3.5" />
+                  c/c
+                </span>
+              ) : (
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
+                  <CashIcon className="w-3.5 h-3.5" />
+                  manuale
+                </span>
+              )}
+            </div>
+
+            <h3 className="text-[15px] font-bold truncate text-slate-900">{payment.title}</h3>
+
+            {payment.amount_cents ? (
+              <p className="mt-1 text-sm font-extrabold text-orange-600">
+                {centsToEuros(payment.amount_cents)}
+              </p>
+            ) : (
+              <p className="mt-1 text-sm text-slate-400">Importo non inserito</p>
+            )}
+          </div>
+
+          <div className="flex flex-col items-end gap-2 shrink-0">
+            {!showConfirm ? (
+              <div className="flex items-center gap-1">
+                <button
+                  onClick={() => setShowEdit(true)}
+                  className="p-2 rounded-xl text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition"
+                  title="Modifica"
+                >
+                  <EditIcon className="w-4 h-4" />
+                </button>
+
+                <button
+                  onClick={() => setShowConfirm(true)}
+                  className="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
+                  title="Elimina"
+                >
+                  <TrashIcon className="w-4 h-4" />
+                </button>
+              </div>
+            ) : (
+              <div className="rounded-2xl border border-red-200 bg-white p-2">
+                <p className="text-[11px] font-semibold text-red-700 mb-2 px-1">Eliminare?</p>
+                <div className="flex gap-1">
+                  <button
+                    onClick={handleDelete}
+                    disabled={isDeleting}
+                    className="p-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition"
+                  >
+                    <CheckIcon className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={() => setShowConfirm(false)}
+                    className="p-2 rounded-xl bg-slate-100 text-slate-700 hover:bg-slate-200 transition"
+                  >
+                    <XIcon className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {showEdit ? (
+        <EditModal payment={payment} onSave={onUpdate} onClose={() => setShowEdit(false)} />
+      ) : null}
+    </>
+  );
+}
+
+// ==================== MONTH INCOME CARD ====================
+
+function MonthIncomeEditor({ monthKey, valueCents, onSave }) {
+  const [draft, setDraft] = useState(valueCents ? (valueCents / 100).toString().replace('.', ',') : '');
+
+  useEffect(() => {
+    setDraft(valueCents ? (valueCents / 100).toString().replace('.', ',') : '');
+  }, [valueCents]);
+
+  const handleBlur = () => {
+    onSave(monthKey, eurosToCents(draft));
+  };
+
+  return (
+    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
+      <div className="flex items-center justify-between gap-3 mb-2">
+        <div>
+          <p className="text-xs uppercase tracking-[0.18em] text-emerald-700 font-bold">Entrate mese</p>
+          <p className="text-sm text-emerald-700/80">Inserisci o modifica quando vuoi</p>
+        </div>
+        <span className="text-sm font-bold text-emerald-700">{centsToEuros(valueCents || 0)}</span>
+      </div>
+
+      <input
+        type="text"
+        value={draft}
+        onChange={(e) => setDraft(e.target.value)}
+        onBlur={handleBlur}
+        placeholder="0,00"
+        inputMode="decimal"
+        pattern="[0-9]+([,\.][0-9]{1,2})?"
+        className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-slate-900 font-bold outline-none transition focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
+      />
+    </div>
+  );
+}
+
+// ==================== MONTH GROUP ====================
+
+function MonthGroup({
+  monthKey,
+  payments,
+  incomeCents,
+  onSaveIncome,
+  onDelete,
+  onUpdate,
+}) {
+  const [year, month] = monthKey.split('-');
+  const monthName = monthNames[parseInt(month, 10) - 1];
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const totalOut = payments.reduce((sum, p) => sum + (p.amount_cents || 0), 0);
+  const totalBank = payments
+    .filter((p) => p.is_bank_charge)
+    .reduce((sum, p) => sum + (p.amount_cents || 0), 0);
+  const diff = (incomeCents || 0) - totalOut;
+  const isCurrentMonth = monthKey === getCurrentMonthKey();
+
+  return (
+    <div className="mb-4">
+      <button
+        onClick={() => setIsExpanded((v) => !v)}
+        className="w-full text-left rounded-3xl border border-white/80 bg-white/80 backdrop-blur p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] hover:bg-white transition"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex items-start gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700 flex items-center justify-center shrink-0">
+              <ChevronDownIcon className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
+            </div>
+
+            <div className="min-w-0">
+              <h3 className="text-[1.05rem] font-black text-slate-900 tracking-tight">
+                {monthName} {year}
+              </h3>
+
+              <div className="mt-2 flex flex-wrap gap-2">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Entrate: {centsToEuros(incomeCents || 0)}
+                </span>
+
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">
+                  Uscite: {centsToEuros(totalOut)}
+                </span>
+
+                <span
+                  className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                    diff >= 0
+                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                      : 'bg-red-50 text-red-700 border-red-200'
+                  }`}
+                >
+                  Differenza: {formatSignedCurrency(diff)}
+                </span>
+              </div>
+
+              <div className="mt-2 flex flex-wrap gap-3 text-xs">
+                <span className="text-slate-500">{payments.length} pagament{payments.length === 1 ? 'o' : 'i'}</span>
+                <span className="text-sky-700 font-semibold flex items-center gap-1">
+                  <BankIcon className="w-3.5 h-3.5" />
+                  Da lasciare su c/c: {centsToEuros(totalBank)}
+                </span>
+                {isCurrentMonth ? (
+                  <span className="text-slate-500">Mese corrente</span>
+                ) : null}
+              </div>
+            </div>
+          </div>
+        </div>
+      </button>
+
+      {isExpanded ? (
+        <div className="mt-3 pl-1 space-y-3">
+          <MonthIncomeEditor monthKey={monthKey} valueCents={incomeCents || 0} onSave={onSaveIncome} />
+
+          <div className="rounded-2xl border border-slate-200 bg-white/85 px-4 py-3 flex flex-wrap gap-x-5 gap-y-2 text-sm shadow-sm">
+            <span className="text-emerald-700 font-semibold">
+              Entrate: <strong>{centsToEuros(incomeCents || 0)}</strong>
+            </span>
+
+            <span className="text-orange-700 font-semibold">
+              Uscite: <strong>{centsToEuros(totalOut)}</strong>
+            </span>
+
+            <span className="text-sky-700 font-semibold">
+              Su c/c: <strong>{centsToEuros(totalBank)}</strong>
+            </span>
+
+            <span className={`font-semibold ${diff >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
+              Differenza: <strong>{formatSignedCurrency(diff)}</strong>
+            </span>
+          </div>
+
+          {payments.map((payment) => (
+            <PaymentItem
+              key={payment.id}
+              payment={payment}
+              onDelete={onDelete}
+              onUpdate={onUpdate}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
   );
 }
 
@@ -887,12 +923,37 @@ export default function App() {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
-  const [filter, setFilter] = useState('all');
-  const [search, setSearch] = useState('');
+
+  const [cashSavingsCents, setCashSavingsCents] = useState(() => safeLoadNumber('payalert_savings_cash', 0));
+  const [bankSavingsCents, setBankSavingsCents] = useState(() => safeLoadNumber('payalert_savings_bank', 0));
+  const [monthIncomes, setMonthIncomes] = useState(() => {
+    try {
+      const raw = localStorage.getItem('payalert_month_incomes');
+      return raw ? JSON.parse(raw) : {};
+    } catch {
+      return {};
+    }
+  });
 
   const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type });
   }, []);
+
+  useEffect(() => {
+    saveNumber('payalert_savings_cash', cashSavingsCents || 0);
+  }, [cashSavingsCents]);
+
+  useEffect(() => {
+    saveNumber('payalert_savings_bank', bankSavingsCents || 0);
+  }, [bankSavingsCents]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem('payalert_month_incomes', JSON.stringify(monthIncomes));
+    } catch {
+      // ignore
+    }
+  }, [monthIncomes]);
 
   const loadPayments = useCallback(
     async (showRefresh = false) => {
@@ -918,36 +979,10 @@ export default function App() {
     loadPayments();
   }, [loadPayments]);
 
-  const filteredPayments = useMemo(() => {
-    const query = search.trim().toLowerCase();
-
-    return payments.filter((payment) => {
-      const matchesSearch = !query || payment.title?.toLowerCase().includes(query);
-      if (!matchesSearch) return false;
-
-      const daysUntil = getDaysUntil(payment.due_date);
-
-      switch (filter) {
-        case 'unpaid':
-          return !payment.is_paid;
-        case 'paid':
-          return payment.is_paid;
-        case 'overdue':
-          return !payment.is_paid && daysUntil < 0;
-        case 'today':
-          return !payment.is_paid && daysUntil === 0;
-        case 'week':
-          return !payment.is_paid && daysUntil >= 0 && daysUntil <= 7;
-        default:
-          return true;
-      }
-    });
-  }, [payments, filter, search]);
-
   const groupedPayments = useMemo(() => {
     const groups = {};
 
-    filteredPayments.forEach((payment) => {
+    payments.forEach((payment) => {
       const monthKey = getMonthKey(payment.due_date);
       if (!groups[monthKey]) groups[monthKey] = [];
       groups[monthKey].push(payment);
@@ -960,21 +995,15 @@ export default function App() {
     return Object.fromEntries(
       Object.entries(groups).sort(([a], [b]) => a.localeCompare(b))
     );
-  }, [filteredPayments]);
-
-  const totals = useMemo(() => {
-    const unpaidAmount = payments
-      .filter((p) => !p.is_paid && p.amount_cents)
-      .reduce((sum, p) => sum + p.amount_cents, 0);
-
-    const paidAmount = payments
-      .filter((p) => p.is_paid && p.amount_cents)
-      .reduce((sum, p) => sum + p.amount_cents, 0);
-
-    const overdueCount = payments.filter((p) => !p.is_paid && getDaysUntil(p.due_date) < 0).length;
-
-    return { unpaidAmount, paidAmount, overdueCount };
   }, [payments]);
+
+  const handleSaveMonthIncome = useCallback((monthKey, incomeCents) => {
+    setMonthIncomes((prev) => ({
+      ...prev,
+      [monthKey]: incomeCents || 0,
+    }));
+    showToast('Entrata mese aggiornata', 'success');
+  }, [showToast]);
 
   const handleAddPayment = async (paymentData) => {
     try {
@@ -1014,11 +1043,7 @@ export default function App() {
   return (
     <div className="min-h-screen min-h-[100dvh] bg-[linear-gradient(180deg,#f7fbff_0%,#eef7ff_42%,#f8fafc_100%)] text-slate-900">
       {toast ? (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
+        <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       ) : null}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
@@ -1048,7 +1073,7 @@ export default function App() {
                   <SparklesIcon className="w-4 h-4 text-sky-500" />
                 </div>
                 <p className="text-sm text-slate-500 truncate">
-                  Le tue scadenze, finalmente belle da vedere
+                  Entrate, uscite e conto corrente tutto sotto controllo
                 </p>
               </div>
             </div>
@@ -1059,46 +1084,20 @@ export default function App() {
       </header>
 
       <main className="relative max-w-2xl mx-auto px-4 py-5 space-y-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <Surface className="p-4 md:p-5 overflow-hidden relative">
-          <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-emerald-100/60 via-sky-100/50 to-cyan-100/60" />
-          <div className="relative grid grid-cols-1 sm:grid-cols-3 gap-3">
-            <div className="rounded-2xl bg-white/85 border border-white/80 p-4 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">Da pagare</p>
-              <p className="mt-2 text-xl font-black text-orange-600">
-                {totals.unpaidAmount > 0 ? centsToEuros(totals.unpaidAmount) : '€ 0,00'}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white/85 border border-white/80 p-4 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">Pagato</p>
-              <p className="mt-2 text-xl font-black text-emerald-600">
-                {totals.paidAmount > 0 ? centsToEuros(totals.paidAmount) : '€ 0,00'}
-              </p>
-            </div>
-
-            <div className="rounded-2xl bg-white/85 border border-white/80 p-4 shadow-sm">
-              <p className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold">Scaduti</p>
-              <p className="mt-2 text-xl font-black text-red-600">{totals.overdueCount}</p>
-            </div>
-          </div>
-        </Surface>
+        <SavingsSection
+          cashCents={cashSavingsCents}
+          bankCents={bankSavingsCents}
+          onChangeCash={setCashSavingsCents}
+          onChangeBank={setBankSavingsCents}
+        />
 
         <AddPaymentForm onAdd={handleAddPayment} />
-
-        <FilterBar
-          filter={filter}
-          setFilter={setFilter}
-          search={search}
-          setSearch={setSearch}
-          totalVisible={filteredPayments.length}
-          totalAll={payments.length}
-        />
 
         <section>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h2 className="text-lg font-black tracking-tight text-slate-900">Pagamenti</h2>
-              <p className="text-sm text-slate-500">Tutto chiaro, tutto sotto controllo</p>
+              <h2 className="text-lg font-black tracking-tight text-slate-900">Mesi</h2>
+              <p className="text-sm text-slate-500">Ogni mese parte chiuso, lo apri solo tu</p>
             </div>
 
             <button
@@ -1129,20 +1128,15 @@ export default function App() {
             </Surface>
           ) : null}
 
-          {!isLoading && !error && filteredPayments.length === 0 ? (
+          {!isLoading && !error && payments.length === 0 ? (
             <Surface className="p-8 text-center">
               <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-sky-50 to-cyan-50 border border-sky-100 text-sky-600 flex items-center justify-center mx-auto mb-4">
                 <CreditCardIcon className="w-8 h-8" />
               </div>
 
-              <p className="text-lg font-black text-slate-900">
-                {payments.length === 0 ? 'Nessun pagamento' : 'Nessun risultato'}
-              </p>
-
+              <p className="text-lg font-black text-slate-900">Nessun pagamento</p>
               <p className="text-sm text-slate-500 mt-1">
-                {payments.length === 0
-                  ? 'Aggiungi il tuo primo pagamento e inizia con stile.'
-                  : 'Prova a cambiare filtro o ricerca.'}
+                Aggiungi il tuo primo pagamento e inizia con stile.
               </p>
             </Surface>
           ) : null}
@@ -1154,6 +1148,8 @@ export default function App() {
                   key={monthKey}
                   monthKey={monthKey}
                   payments={monthPayments}
+                  incomeCents={monthIncomes[monthKey] || 0}
+                  onSaveIncome={handleSaveMonthIncome}
                   onDelete={handleDeletePayment}
                   onUpdate={handleUpdatePayment}
                 />

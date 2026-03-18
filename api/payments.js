@@ -5,7 +5,6 @@ export const config = {
 };
 
 export default async function handler(request) {
-  // Handle CORS
   const corsResponse = handleCors(request);
   if (corsResponse) return corsResponse;
 
@@ -40,26 +39,39 @@ export default async function handler(request) {
     // POST /api/payments
     if (method === 'POST') {
       const body = await request.json();
-      const { device_id, title, due_date, amount_cents, notes } = body;
+      const { device_id, title, due_date, amount_cents, notes, is_bank_charge } = body;
 
       if (!device_id || !title || !due_date) {
         return errorResponse('device_id, title, and due_date are required', 400);
       }
 
-      // Validate date format
       if (!/^\d{4}-\d{2}-\d{2}$/.test(due_date)) {
         return errorResponse('Invalid date format. Use YYYY-MM-DD', 400);
+      }
+
+      const normalizedTitle = title.trim();
+      if (!normalizedTitle) {
+        return errorResponse('title cannot be empty', 400);
+      }
+
+      const normalizedAmount =
+        amount_cents === '' || amount_cents === null || amount_cents === undefined
+          ? null
+          : Number(amount_cents);
+
+      if (normalizedAmount !== null && !Number.isInteger(normalizedAmount)) {
+        return errorResponse('amount_cents must be an integer', 400);
       }
 
       const { data, error } = await supabase
         .from('payments')
         .insert({
           device_id,
-          title: title.trim(),
+          title: normalizedTitle,
           due_date,
-          amount_cents: amount_cents || null,
+          amount_cents: normalizedAmount,
           notes: notes || null,
-          is_paid: false,
+          is_bank_charge: Boolean(is_bank_charge),
         })
         .select()
         .single();
@@ -72,27 +84,46 @@ export default async function handler(request) {
       return jsonResponse(data, 201);
     }
 
-    // PUT /api/payments - Update payment
+    // PUT /api/payments
     if (method === 'PUT') {
       const body = await request.json();
-      const { id, device_id, title, due_date, amount_cents, notes, is_paid } = body;
+      const { id, device_id, title, due_date, amount_cents, notes, is_bank_charge } = body;
 
       if (!id || !device_id) {
         return errorResponse('id and device_id are required', 400);
       }
 
-      // Build update object with only provided fields
       const updateData = {};
-      if (title !== undefined) updateData.title = title.trim();
+
+      if (title !== undefined) {
+        const normalizedTitle = String(title).trim();
+        if (!normalizedTitle) {
+          return errorResponse('title cannot be empty', 400);
+        }
+        updateData.title = normalizedTitle;
+      }
+
       if (due_date !== undefined) {
         if (!/^\d{4}-\d{2}-\d{2}$/.test(due_date)) {
           return errorResponse('Invalid date format. Use YYYY-MM-DD', 400);
         }
         updateData.due_date = due_date;
       }
-      if (amount_cents !== undefined) updateData.amount_cents = amount_cents;
-      if (notes !== undefined) updateData.notes = notes;
-      if (is_paid !== undefined) updateData.is_paid = is_paid;
+
+      if (amount_cents !== undefined) {
+        if (amount_cents === '' || amount_cents === null) {
+          updateData.amount_cents = null;
+        } else {
+          const normalizedAmount = Number(amount_cents);
+          if (!Number.isInteger(normalizedAmount)) {
+            return errorResponse('amount_cents must be an integer', 400);
+          }
+          updateData.amount_cents = normalizedAmount;
+        }
+      }
+
+      if (notes !== undefined) updateData.notes = notes || null;
+      if (is_bank_charge !== undefined) updateData.is_bank_charge = Boolean(is_bank_charge);
 
       const { data, error } = await supabase
         .from('payments')
