@@ -39,7 +39,7 @@ export default async function handler(request) {
     // POST /api/payments
     if (method === 'POST') {
       const body = await request.json();
-      const { device_id, title, due_date, amount_cents, notes, is_bank_charge } = body;
+      const { device_id, title, due_date, amount_cents, notes } = body;
 
       if (!device_id || !title || !due_date) {
         return errorResponse('device_id, title, and due_date are required', 400);
@@ -71,7 +71,6 @@ export default async function handler(request) {
           due_date,
           amount_cents: normalizedAmount,
           notes: notes || null,
-          is_bank_charge: Boolean(is_bank_charge),
         })
         .select()
         .single();
@@ -87,7 +86,7 @@ export default async function handler(request) {
     // PUT /api/payments
     if (method === 'PUT') {
       const body = await request.json();
-      const { id, device_id, title, due_date, amount_cents, notes, is_bank_charge } = body;
+      const { id, device_id, title, due_date, amount_cents, notes } = body;
 
       if (!id || !device_id) {
         return errorResponse('id and device_id are required', 400);
@@ -122,8 +121,9 @@ export default async function handler(request) {
         }
       }
 
-      if (notes !== undefined) updateData.notes = notes || null;
-      if (is_bank_charge !== undefined) updateData.is_bank_charge = Boolean(is_bank_charge);
+      if (notes !== undefined) {
+        updateData.notes = notes || null;
+      }
 
       const { data, error } = await supabase
         .from('payments')

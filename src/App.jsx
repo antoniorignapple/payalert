@@ -46,7 +46,7 @@ function TrashIcon({ className = 'w-5 h-5' }) {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+        d="M19 7l-.867 12.142A2.002 2.002 0 0116.138 21H7.862a2.002 2.002 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
       />
     </svg>
   );
@@ -76,7 +76,7 @@ function RefreshIcon({ className = 'w-5 h-5', spinning = false }) {
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9M4.582 9H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
       />
     </svg>
   );
@@ -108,11 +108,11 @@ function XIcon({ className = 'w-5 h-5' }) {
 
 function CreditCardIcon({ className = 'w-6 h-6' }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.6}>
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
       <path
         strokeLinecap="round"
         strokeLinejoin="round"
-        d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z"
+        d="M3 7.5h18M3 9.75h18M5.25 15h5.25m-5.25 2.25H9m10.5 2.25H4.5A2.25 2.25 0 012.25 17.25v-10.5A2.25 2.25 0 014.5 4.5h15A2.25 2.25 0 0121.75 6.75v10.5A2.25 2.25 0 0119.5 19.5Z"
       />
     </svg>
   );
@@ -138,19 +138,14 @@ function SparklesIcon({ className = 'w-5 h-5' }) {
   );
 }
 
-function BankIcon({ className = 'w-5 h-5' }) {
+function CalendarIcon({ className = 'w-5 h-5' }) {
   return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M3 10.5 12 4l9 6.5M4.5 10.5h15M6 10.5V18m4-7.5V18m4-7.5V18m4-7.5V18M4 20h16" />
-    </svg>
-  );
-}
-
-function CashIcon({ className = 'w-5 h-5' }) {
-  return (
-    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 7.5A2.25 2.25 0 0 1 4.5 5.25h15A2.25 2.25 0 0 1 21.75 7.5v9A2.25 2.25 0 0 1 19.5 18.75h-15A2.25 2.25 0 0 1 2.25 16.5v-9Z" />
-      <path strokeLinecap="round" strokeLinejoin="round" d="M6 12h.008v.008H6V12Zm12 0h.008v.008H18V12ZM12 15.75c1.657 0 3-1.679 3-3.75s-1.343-3.75-3-3.75-3 1.679-3 3.75 1.343 3.75 3 3.75Z" />
+    <svg className={className} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.9}>
+      <path
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        d="M8 2v3M16 2v3M3.75 9.25h16.5M5.25 4.75h13.5A1.5 1.5 0 0120.25 6.25v12.5a1.5 1.5 0 01-1.5 1.5H5.25a1.5 1.5 0 01-1.5-1.5V6.25a1.5 1.5 0 011.5-1.5Z"
+      />
     </svg>
   );
 }
@@ -181,11 +176,6 @@ function getMonthKey(dateString) {
   return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
 }
 
-function getCurrentMonthKey() {
-  const now = new Date();
-  return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-}
-
 function sortPaymentsByDate(items) {
   return [...items].sort((a, b) => {
     const da = parseLocalDate(a.due_date);
@@ -195,36 +185,19 @@ function sortPaymentsByDate(items) {
   });
 }
 
-function formatSignedCurrency(cents) {
-  const abs = Math.abs(cents);
-  const formatted = centsToEuros(abs);
-  return cents >= 0 ? `+ ${formatted}` : `- ${formatted}`;
-}
-
-function safeLoadNumber(key, defaultValue = 0) {
-  try {
-    const raw = localStorage.getItem(key);
-    if (!raw) return defaultValue;
-    const parsed = Number(raw);
-    return Number.isFinite(parsed) ? parsed : defaultValue;
-  } catch {
-    return defaultValue;
-  }
-}
-
-function saveNumber(key, value) {
-  try {
-    localStorage.setItem(key, String(value));
-  } catch {
-    // ignore
-  }
+function isPastDate(dateString) {
+  const today = new Date();
+  const todayOnly = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+  return parseLocalDate(dateString) < todayOnly;
 }
 
 // ==================== UI BASE ====================
 
 function Surface({ className = '', children }) {
   return (
-    <div className={`rounded-2xl border border-white/70 bg-white/80 backdrop-blur shadow-[0_10px_30px_rgba(15,23,42,0.08)] ${className}`}>
+    <div
+      className={`rounded-[28px] border border-white/70 bg-white/70 backdrop-blur-xl shadow-[0_16px_50px_rgba(15,23,42,0.10)] ${className}`}
+    >
       {children}
     </div>
   );
@@ -234,13 +207,13 @@ function Surface({ className = '', children }) {
 
 function Toast({ message, type = 'info', onClose }) {
   useEffect(() => {
-    const timer = setTimeout(onClose, 3800);
+    const timer = setTimeout(onClose, 3500);
     return () => clearTimeout(timer);
   }, [onClose]);
 
   const tone = {
     success: 'bg-emerald-600',
-    error: 'bg-red-600',
+    error: 'bg-rose-600',
     info: 'bg-slate-900',
     warning: 'bg-amber-500 text-slate-900',
   }[type] || 'bg-slate-900';
@@ -301,7 +274,7 @@ function NotificationButton() {
 
   if (status === 'unsupported') {
     return (
-      <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-500">
+      <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white/80 px-3 py-2 text-xs font-semibold text-slate-500">
         <BellOffIcon className="w-4 h-4" />
         Non supportato
       </div>
@@ -310,7 +283,7 @@ function NotificationButton() {
 
   if (status === 'denied') {
     return (
-      <div className="inline-flex items-center gap-2 rounded-full border border-red-200 bg-red-50 px-3 py-2 text-xs font-semibold text-red-700">
+      <div className="inline-flex items-center gap-2 rounded-full border border-rose-200 bg-rose-50 px-3 py-2 text-xs font-semibold text-rose-700">
         <BellOffIcon className="w-4 h-4" />
         Bloccate
       </div>
@@ -330,99 +303,11 @@ function NotificationButton() {
     <button
       onClick={handleSubscribe}
       disabled={isSubscribing}
-      className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-sky-50 px-3 py-2 text-xs font-semibold text-sky-700 hover:bg-sky-100 transition disabled:opacity-50"
+      className="inline-flex items-center gap-2 rounded-full border border-fuchsia-200 bg-white/90 px-3 py-2 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 transition disabled:opacity-50"
     >
       {isSubscribing ? <RefreshIcon className="w-4 h-4" spinning /> : <BellIcon className="w-4 h-4" />}
       Attiva notifiche
     </button>
-  );
-}
-
-// ==================== SALVADANAI ====================
-
-function WalletCard({ label, icon, value, onChange, colorClasses }) {
-  const [draft, setDraft] = useState(value ? (value / 100).toString().replace('.', ',') : '');
-
-  useEffect(() => {
-    setDraft(value ? (value / 100).toString().replace('.', ',') : '');
-  }, [value]);
-
-  const handleSave = () => {
-    onChange(eurosToCents(draft));
-  };
-
-  return (
-    <div className="rounded-2xl border border-white/80 bg-white/90 px-4 py-3 shadow-sm">
-      <div className="flex items-center gap-3">
-        <div className={`w-10 h-10 rounded-2xl flex items-center justify-center shrink-0 ${colorClasses}`}>
-          {icon}
-        </div>
-
-        <div className="min-w-0 flex-1">
-          <p className="text-xs uppercase tracking-[0.18em] text-slate-500 font-bold mb-1">
-            {label}
-          </p>
-
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={draft}
-              onChange={(e) => setDraft(e.target.value)}
-              placeholder="0,00"
-              inputMode="decimal"
-              pattern="[0-9]+([,\.][0-9]{1,2})?"
-              className="flex-1 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-slate-900 font-bold outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100"
-            />
-
-            <button
-              type="button"
-              onClick={handleSave}
-              className="rounded-2xl px-4 py-2.5 font-semibold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 transition shadow-lg shadow-sky-200 whitespace-nowrap"
-            >
-              Salva
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function SavingsSection({ cashCents, bankCents, onChangeCash, onChangeBank }) {
-  return (
-    <Surface className="p-4 md:p-5 overflow-hidden relative">
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-emerald-100/60 via-sky-100/50 to-cyan-100/60" />
-
-      <div className="relative">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-emerald-500 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-emerald-200">
-            <SparklesIcon className="w-5 h-5" />
-          </div>
-          <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-sky-600 font-bold">Salvadanaio</p>
-            <h2 className="text-lg font-black text-slate-900">Disponibilità accantonata</h2>
-          </div>
-        </div>
-
-        <div className="space-y-3">
-          <WalletCard
-            label="Contante"
-            value={cashCents}
-            onChange={onChangeCash}
-            icon={<CashIcon className="w-5 h-5" />}
-            colorClasses="bg-emerald-50 text-emerald-700 border border-emerald-100"
-          />
-
-          <WalletCard
-            label="Conto corrente"
-            value={bankCents}
-            onChange={onChangeBank}
-            icon={<BankIcon className="w-5 h-5" />}
-            colorClasses="bg-sky-50 text-sky-700 border border-sky-100"
-          />
-        </div>
-      </div>
-    </Surface>
   );
 }
 
@@ -432,7 +317,6 @@ function AddPaymentForm({ onAdd }) {
   const [title, setTitle] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [amount, setAmount] = useState('');
-  const [isBankCharge, setIsBankCharge] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const titleRef = useRef(null);
@@ -442,7 +326,7 @@ function AddPaymentForm({ onAdd }) {
   }, []);
 
   const inputBase =
-    'w-full rounded-2xl border border-white/80 bg-white/90 px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100';
+    'w-full rounded-2xl border border-white/70 bg-white/85 px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-fuchsia-300 focus:ring-4 focus:ring-fuchsia-100';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -455,12 +339,10 @@ function AddPaymentForm({ onAdd }) {
         due_date: dueDate,
         amount_cents: eurosToCents(amount),
         notes: null,
-        is_bank_charge: isBankCharge,
       });
 
       setTitle('');
       setAmount('');
-      setIsBankCharge(false);
       titleRef.current?.focus();
     } finally {
       setIsSubmitting(false);
@@ -469,27 +351,27 @@ function AddPaymentForm({ onAdd }) {
 
   return (
     <Surface className="p-4 md:p-5 overflow-hidden relative">
-      <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-r from-sky-100/70 via-cyan-100/50 to-indigo-100/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(217,70,239,0.15),transparent_35%),radial-gradient(circle_at_top_right,rgba(59,130,246,0.12),transparent_30%),linear-gradient(135deg,rgba(255,255,255,0.9),rgba(255,255,255,0.72))]" />
 
       <div className="relative">
         <div className="flex items-center gap-3 mb-4">
-          <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-sky-500 to-cyan-500 text-white flex items-center justify-center shadow-lg shadow-sky-200">
+          <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-fuchsia-500 via-violet-500 to-sky-500 text-white flex items-center justify-center shadow-lg shadow-fuchsia-200">
             <PlusIcon className="w-5 h-5" />
           </div>
           <div>
-            <p className="text-xs uppercase tracking-[0.18em] text-sky-600 font-bold">Nuovo pagamento</p>
+            <p className="text-xs uppercase tracking-[0.18em] text-fuchsia-600 font-bold">Nuovo pagamento</p>
             <h2 className="text-lg font-black text-slate-900">Aggiungi una scadenza</h2>
           </div>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-3">
-          <div className="grid grid-cols-1 sm:grid-cols-[1.25fr_0.75fr] gap-3">
+          <div className="grid grid-cols-1 sm:grid-cols-[1.2fr_0.8fr] gap-3">
             <input
               ref={titleRef}
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Descrizione"
+              placeholder="Descrizione pagamento"
               required
               className={inputBase}
             />
@@ -515,25 +397,12 @@ function AddPaymentForm({ onAdd }) {
             <button
               type="submit"
               disabled={isSubmitting || !title.trim() || !dueDate}
-              className="rounded-2xl px-4 py-3 font-bold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-sky-200"
+              className="rounded-2xl px-4 py-3 font-bold text-white bg-gradient-to-r from-fuchsia-500 via-violet-500 to-sky-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-200"
             >
               {isSubmitting ? <RefreshIcon className="w-5 h-5" spinning /> : <CheckIcon className="w-5 h-5" />}
               Salva
             </button>
           </div>
-
-          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 cursor-pointer hover:bg-slate-50 transition">
-     <input
-  type="checkbox"
-  checked={isBankCharge}
-  onChange={(e) => setIsBankCharge(e.target.checked)}
-  className="h-5 w-5 shrink-0 cursor-pointer accent-sky-600"
-/>
-            <div className="flex items-center gap-2">
-              <BankIcon className="w-5 h-5 text-sky-600" />
-              <span className="font-semibold text-slate-800">Addebito diretto su c/c</span>
-            </div>
-          </label>
         </form>
       </div>
     </Surface>
@@ -545,13 +414,14 @@ function AddPaymentForm({ onAdd }) {
 function EditModal({ payment, onSave, onClose }) {
   const [title, setTitle] = useState(payment.title);
   const [dueDate, setDueDate] = useState(payment.due_date);
-  const [amount, setAmount] = useState(payment.amount_cents ? (payment.amount_cents / 100).toString().replace('.', ',') : '');
-  const [isBankCharge, setIsBankCharge] = useState(Boolean(payment.is_bank_charge));
+  const [amount, setAmount] = useState(
+    payment.amount_cents ? (payment.amount_cents / 100).toString().replace('.', ',') : ''
+  );
   const [isSaving, setIsSaving] = useState(false);
   const [localError, setLocalError] = useState('');
 
   const inputBase =
-    'w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-sky-300 focus:ring-4 focus:ring-sky-100';
+    'w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 text-slate-900 placeholder-slate-400 outline-none transition focus:border-fuchsia-300 focus:ring-4 focus:ring-fuchsia-100';
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -566,7 +436,6 @@ function EditModal({ payment, onSave, onClose }) {
         title: title.trim(),
         due_date: dueDate,
         amount_cents: eurosToCents(amount),
-        is_bank_charge: isBankCharge,
       });
       onClose();
     } catch (err) {
@@ -577,11 +446,17 @@ function EditModal({ payment, onSave, onClose }) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-slate-900/35 backdrop-blur-sm flex items-center justify-center p-4" onClick={onClose}>
-      <div className="w-full max-w-md rounded-3xl bg-white shadow-2xl border border-white/80 p-5" onClick={(e) => e.stopPropagation()}>
+    <div
+      className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-sm flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div
+        className="w-full max-w-md rounded-[30px] bg-white shadow-2xl border border-white/80 p-5"
+        onClick={(e) => e.stopPropagation()}
+      >
         <div className="flex items-center justify-between mb-5">
           <div>
-            <p className="text-xs uppercase tracking-[0.2em] text-sky-500 font-bold">Modifica</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-fuchsia-500 font-bold">Modifica</p>
             <h2 className="text-xl font-black text-slate-900 mt-1">Aggiorna pagamento</h2>
           </div>
           <button onClick={onClose} className="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
@@ -617,21 +492,8 @@ function EditModal({ payment, onSave, onClose }) {
             className={inputBase}
           />
 
-          <label className="flex items-center gap-3 rounded-2xl border border-slate-200 bg-white px-4 py-3 cursor-pointer hover:bg-slate-50 transition">
-            <input
-              type="checkbox"
-              checked={isBankCharge}
-              onChange={(e) => setIsBankCharge(e.target.checked)}
-              className="w-5 h-5 rounded-md border-slate-300 text-sky-600 focus:ring-sky-500"
-            />
-            <div className="flex items-center gap-2">
-              <BankIcon className="w-5 h-5 text-sky-600" />
-              <span className="font-semibold text-slate-800">Addebito diretto su c/c</span>
-            </div>
-          </label>
-
           {localError ? (
-            <div className="rounded-2xl border border-red-200 bg-red-50 text-red-700 text-sm px-4 py-3">
+            <div className="rounded-2xl border border-rose-200 bg-rose-50 text-rose-700 text-sm px-4 py-3">
               {localError}
             </div>
           ) : null}
@@ -648,7 +510,7 @@ function EditModal({ payment, onSave, onClose }) {
             <button
               type="submit"
               disabled={isSaving || !title.trim() || !dueDate}
-              className="rounded-2xl px-4 py-3 font-semibold text-white bg-gradient-to-r from-sky-500 via-cyan-500 to-indigo-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-sky-200"
+              className="rounded-2xl px-4 py-3 font-semibold text-white bg-gradient-to-r from-fuchsia-500 via-violet-500 to-sky-500 hover:opacity-95 disabled:opacity-50 transition flex items-center justify-center gap-2 shadow-lg shadow-fuchsia-200"
             >
               {isSaving ? <RefreshIcon className="w-5 h-5" spinning /> : <CheckIcon className="w-5 h-5" />}
               Salva
@@ -674,6 +536,8 @@ function PaymentItem({ payment, onDelete, onUpdate }) {
     month: 'short',
   });
 
+  const expired = isPastDate(payment.due_date);
+
   const handleDelete = async () => {
     if (isDeleting) return;
     setIsDeleting(true);
@@ -687,7 +551,7 @@ function PaymentItem({ payment, onDelete, onUpdate }) {
 
   return (
     <>
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
+      <div className="rounded-[24px] border border-white/70 bg-white/80 backdrop-blur p-4 shadow-[0_10px_30px_rgba(15,23,42,0.06)]">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0 flex-1">
             <div className="flex flex-wrap items-center gap-2 mb-2">
@@ -695,27 +559,25 @@ function PaymentItem({ payment, onDelete, onUpdate }) {
                 {formattedDate}
               </span>
 
-              {payment.is_bank_charge ? (
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-sky-50 text-sky-700 border border-sky-200 flex items-center gap-1">
-                  <BankIcon className="w-3.5 h-3.5" />
-                  c/c
-                </span>
-              ) : (
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 flex items-center gap-1">
-                  <CashIcon className="w-3.5 h-3.5" />
-                  manuale
-                </span>
-              )}
+              <span
+                className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
+                  expired
+                    ? 'bg-rose-50 text-rose-700 border-rose-200'
+                    : 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                }`}
+              >
+                {expired ? 'Scaduto' : 'Da fare'}
+              </span>
             </div>
 
-            <h3 className="text-[15px] font-bold truncate text-slate-900">{payment.title}</h3>
+            <h3 className="text-[15px] font-bold text-slate-900 break-words">{payment.title}</h3>
 
             {payment.amount_cents ? (
-              <p className="mt-1 text-sm font-extrabold text-orange-600">
+              <p className="mt-2 text-base font-extrabold bg-gradient-to-r from-fuchsia-600 to-sky-600 bg-clip-text text-transparent">
                 {centsToEuros(payment.amount_cents)}
               </p>
             ) : (
-              <p className="mt-1 text-sm text-slate-400">Importo non inserito</p>
+              <p className="mt-2 text-sm text-slate-400">Importo non inserito</p>
             )}
           </div>
 
@@ -724,7 +586,7 @@ function PaymentItem({ payment, onDelete, onUpdate }) {
               <div className="flex items-center gap-1">
                 <button
                   onClick={() => setShowEdit(true)}
-                  className="p-2 rounded-xl text-slate-500 hover:text-sky-600 hover:bg-sky-50 transition"
+                  className="p-2 rounded-xl text-slate-500 hover:text-fuchsia-600 hover:bg-fuchsia-50 transition"
                   title="Modifica"
                 >
                   <EditIcon className="w-4 h-4" />
@@ -732,20 +594,20 @@ function PaymentItem({ payment, onDelete, onUpdate }) {
 
                 <button
                   onClick={() => setShowConfirm(true)}
-                  className="p-2 rounded-xl text-slate-500 hover:text-red-600 hover:bg-red-50 transition"
+                  className="p-2 rounded-xl text-slate-500 hover:text-rose-600 hover:bg-rose-50 transition"
                   title="Elimina"
                 >
                   <TrashIcon className="w-4 h-4" />
                 </button>
               </div>
             ) : (
-              <div className="rounded-2xl border border-red-200 bg-white p-2">
-                <p className="text-[11px] font-semibold text-red-700 mb-2 px-1">Eliminare?</p>
+              <div className="rounded-2xl border border-rose-200 bg-white p-2">
+                <p className="text-[11px] font-semibold text-rose-700 mb-2 px-1">Eliminare?</p>
                 <div className="flex gap-1">
                   <button
                     onClick={handleDelete}
                     disabled={isDeleting}
-                    className="p-2 rounded-xl bg-red-600 text-white hover:bg-red-700 transition"
+                    className="p-2 rounded-xl bg-rose-600 text-white hover:bg-rose-700 transition"
                   >
                     <CheckIcon className="w-4 h-4" />
                   </button>
@@ -762,117 +624,58 @@ function PaymentItem({ payment, onDelete, onUpdate }) {
         </div>
       </div>
 
-      {showEdit ? (
-        <EditModal payment={payment} onSave={onUpdate} onClose={() => setShowEdit(false)} />
-      ) : null}
+      {showEdit ? <EditModal payment={payment} onSave={onUpdate} onClose={() => setShowEdit(false)} /> : null}
     </>
-  );
-}
-
-// ==================== MONTH INCOME CARD ====================
-
-function MonthIncomeEditor({ monthKey, valueCents, onSave }) {
-  const [draft, setDraft] = useState(valueCents ? (valueCents / 100).toString().replace('.', ',') : '');
-
-  useEffect(() => {
-    setDraft(valueCents ? (valueCents / 100).toString().replace('.', ',') : '');
-  }, [valueCents]);
-
-  const handleBlur = () => {
-    onSave(monthKey, eurosToCents(draft));
-  };
-
-  return (
-    <div className="rounded-2xl border border-emerald-200 bg-emerald-50/70 p-4">
-      <div className="flex items-center justify-between gap-3 mb-2">
-        <div>
-          <p className="text-xs uppercase tracking-[0.18em] text-emerald-700 font-bold">Entrate mese</p>
-          <p className="text-sm text-emerald-700/80">Inserisci o modifica quando vuoi</p>
-        </div>
-        <span className="text-sm font-bold text-emerald-700">{centsToEuros(valueCents || 0)}</span>
-      </div>
-
-      <input
-        type="text"
-        value={draft}
-        onChange={(e) => setDraft(e.target.value)}
-        onBlur={handleBlur}
-        placeholder="0,00"
-        inputMode="decimal"
-        pattern="[0-9]+([,\.][0-9]{1,2})?"
-        className="w-full rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-slate-900 font-bold outline-none transition focus:border-emerald-300 focus:ring-4 focus:ring-emerald-100"
-      />
-    </div>
   );
 }
 
 // ==================== MONTH GROUP ====================
 
-function MonthGroup({
-  monthKey,
-  payments,
-  incomeCents,
-  onSaveIncome,
-  onDelete,
-  onUpdate,
-}) {
+function MonthGroup({ monthKey, payments, onDelete, onUpdate }) {
   const [year, month] = monthKey.split('-');
   const monthName = monthNames[parseInt(month, 10) - 1];
   const [isExpanded, setIsExpanded] = useState(false);
 
-  const totalOut = payments.reduce((sum, p) => sum + (p.amount_cents || 0), 0);
-  const totalBank = payments
-    .filter((p) => p.is_bank_charge)
-    .reduce((sum, p) => sum + (p.amount_cents || 0), 0);
-  const diff = (incomeCents || 0) - totalOut;
-  const isCurrentMonth = monthKey === getCurrentMonthKey();
+  const totalAmount = payments.reduce((sum, p) => sum + (p.amount_cents || 0), 0);
+  const paymentsCount = payments.length;
 
   return (
     <div className="mb-4">
       <button
         onClick={() => setIsExpanded((v) => !v)}
-        className="w-full text-left rounded-3xl border border-white/80 bg-white/80 backdrop-blur p-4 shadow-[0_10px_30px_rgba(15,23,42,0.08)] hover:bg-white transition"
+        className="group w-full text-left rounded-[30px] border border-white/70 bg-white/72 backdrop-blur-xl p-4 shadow-[0_16px_40px_rgba(15,23,42,0.09)] hover:bg-white/85 transition"
       >
-        <div className="flex items-start justify-between gap-3">
+        <div className="flex items-start justify-between gap-4">
           <div className="flex items-start gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-sky-100 to-cyan-100 text-sky-700 flex items-center justify-center shrink-0">
-              <ChevronDownIcon className={`w-5 h-5 transition-transform ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-fuchsia-100 via-violet-100 to-sky-100 text-fuchsia-700 flex items-center justify-center shrink-0">
+              <ChevronDownIcon className={`w-5 h-5 transition-transform duration-300 ${isExpanded ? 'rotate-0' : '-rotate-90'}`} />
             </div>
 
             <div className="min-w-0">
-              <h3 className="text-[1.05rem] font-black text-slate-900 tracking-tight">
-                {monthName} {year}
-              </h3>
-
-              <div className="mt-2 flex flex-wrap gap-2">
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                  Entrate: {centsToEuros(incomeCents || 0)}
-                </span>
-
-                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-orange-50 text-orange-700 border border-orange-200">
-                  Uscite: {centsToEuros(totalOut)}
-                </span>
+              <div className="flex items-center gap-2 flex-wrap">
+                <h3 className="text-[1.05rem] font-black text-slate-900 tracking-tight">
+                  {monthName} {year}
+                </h3>
 
                 <span
-                  className={`text-xs font-semibold px-2.5 py-1 rounded-full border ${
-                    diff >= 0
-                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
-                      : 'bg-red-50 text-red-700 border-red-200'
+                  className={`text-[11px] font-bold px-2.5 py-1 rounded-full border ${
+                    isExpanded
+                      ? 'bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200'
+                      : 'bg-slate-100 text-slate-700 border-slate-200'
                   }`}
                 >
-                  Differenza: {formatSignedCurrency(diff)}
+                  {isExpanded ? 'Aperto' : 'Chiuso'}
                 </span>
               </div>
 
-              <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                <span className="text-slate-500">{payments.length} pagament{payments.length === 1 ? 'o' : 'i'}</span>
-                <span className="text-sky-700 font-semibold flex items-center gap-1">
-                  <BankIcon className="w-3.5 h-3.5" />
-                  Da lasciare su c/c: {centsToEuros(totalBank)}
+              <div className="mt-3 flex flex-wrap gap-2">
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-slate-100 text-slate-700 border border-slate-200">
+                  {paymentsCount} pagament{paymentsCount === 1 ? 'o' : 'i'}
                 </span>
-                {isCurrentMonth ? (
-                  <span className="text-slate-500">Mese corrente</span>
-                ) : null}
+
+                <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-gradient-to-r from-fuchsia-50 to-sky-50 text-fuchsia-700 border border-fuchsia-100">
+                  Totale da effettuare: {centsToEuros(totalAmount)}
+                </span>
               </div>
             </div>
           </div>
@@ -881,24 +684,18 @@ function MonthGroup({
 
       {isExpanded ? (
         <div className="mt-3 pl-1 space-y-3">
-          <MonthIncomeEditor monthKey={monthKey} valueCents={incomeCents || 0} onSave={onSaveIncome} />
-
-          <div className="rounded-2xl border border-slate-200 bg-white/85 px-4 py-3 flex flex-wrap gap-x-5 gap-y-2 text-sm shadow-sm">
-            <span className="text-emerald-700 font-semibold">
-              Entrate: <strong>{centsToEuros(incomeCents || 0)}</strong>
-            </span>
-
-            <span className="text-orange-700 font-semibold">
-              Uscite: <strong>{centsToEuros(totalOut)}</strong>
-            </span>
-
-            <span className="text-sky-700 font-semibold">
-              Su c/c: <strong>{centsToEuros(totalBank)}</strong>
-            </span>
-
-            <span className={`font-semibold ${diff >= 0 ? 'text-emerald-700' : 'text-red-700'}`}>
-              Differenza: <strong>{formatSignedCurrency(diff)}</strong>
-            </span>
+          <div className="rounded-[24px] border border-fuchsia-100 bg-gradient-to-r from-fuchsia-50/90 via-violet-50/80 to-sky-50/90 px-4 py-4 shadow-sm">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-2xl bg-white text-fuchsia-600 flex items-center justify-center border border-fuchsia-100 shadow-sm">
+                <CalendarIcon className="w-5 h-5" />
+              </div>
+              <div>
+                <p className="text-xs uppercase tracking-[0.18em] text-fuchsia-600 font-bold">Riepilogo mese</p>
+                <p className="text-sm font-semibold text-slate-700">
+                  Totale pagamenti da effettuare: <span className="font-black text-slate-900">{centsToEuros(totalAmount)}</span>
+                </p>
+              </div>
+            </div>
           </div>
 
           {payments.map((payment) => (
@@ -924,36 +721,9 @@ export default function App() {
   const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
 
-  const [cashSavingsCents, setCashSavingsCents] = useState(() => safeLoadNumber('payalert_savings_cash', 0));
-  const [bankSavingsCents, setBankSavingsCents] = useState(() => safeLoadNumber('payalert_savings_bank', 0));
-  const [monthIncomes, setMonthIncomes] = useState(() => {
-    try {
-      const raw = localStorage.getItem('payalert_month_incomes');
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  });
-
   const showToast = useCallback((message, type = 'info') => {
     setToast({ message, type });
   }, []);
-
-  useEffect(() => {
-    saveNumber('payalert_savings_cash', cashSavingsCents || 0);
-  }, [cashSavingsCents]);
-
-  useEffect(() => {
-    saveNumber('payalert_savings_bank', bankSavingsCents || 0);
-  }, [bankSavingsCents]);
-
-  useEffect(() => {
-    try {
-      localStorage.setItem('payalert_month_incomes', JSON.stringify(monthIncomes));
-    } catch {
-      // ignore
-    }
-  }, [monthIncomes]);
 
   const loadPayments = useCallback(
     async (showRefresh = false) => {
@@ -997,14 +767,6 @@ export default function App() {
     );
   }, [payments]);
 
-  const handleSaveMonthIncome = useCallback((monthKey, incomeCents) => {
-    setMonthIncomes((prev) => ({
-      ...prev,
-      [monthKey]: incomeCents || 0,
-    }));
-    showToast('Entrata mese aggiornata', 'success');
-  }, [showToast]);
-
   const handleAddPayment = async (paymentData) => {
     try {
       await createPayment(paymentData);
@@ -1041,18 +803,18 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen min-h-[100dvh] bg-[linear-gradient(180deg,#f7fbff_0%,#eef7ff_42%,#f8fafc_100%)] text-slate-900">
+    <div className="min-h-screen min-h-[100dvh] bg-[linear-gradient(180deg,#fdf7ff_0%,#f6f8ff_28%,#f4fbff_58%,#f8fafc_100%)] text-slate-900">
       {toast ? (
         <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />
       ) : null}
 
       <div className="pointer-events-none fixed inset-0 overflow-hidden">
-        <div className="absolute -top-24 -left-16 w-72 h-72 rounded-full bg-sky-200/40 blur-3xl" />
-        <div className="absolute top-40 -right-16 w-72 h-72 rounded-full bg-cyan-200/30 blur-3xl" />
-        <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-[28rem] h-[14rem] rounded-full bg-indigo-200/20 blur-3xl" />
+        <div className="absolute -top-24 -left-16 w-80 h-80 rounded-full bg-fuchsia-200/35 blur-3xl" />
+        <div className="absolute top-16 -right-20 w-80 h-80 rounded-full bg-sky-200/30 blur-3xl" />
+        <div className="absolute bottom-10 left-1/2 -translate-x-1/2 w-[30rem] h-[14rem] rounded-full bg-violet-200/20 blur-3xl" />
       </div>
 
-      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/65 border-b border-white/60">
+      <header className="sticky top-0 z-40 backdrop-blur-xl bg-white/55 border-b border-white/60">
         <div className="max-w-2xl mx-auto px-4 pt-[max(0.85rem,env(safe-area-inset-top))] pb-4">
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0 flex items-center gap-3">
@@ -1070,10 +832,10 @@ export default function App() {
                   <h1 className="text-[1.3rem] font-black tracking-tight text-slate-900 truncate">
                     PayAlert
                   </h1>
-                  <SparklesIcon className="w-4 h-4 text-sky-500" />
+                  <SparklesIcon className="w-4 h-4 text-fuchsia-500" />
                 </div>
                 <p className="text-sm text-slate-500 truncate">
-                  Entrate, uscite e conto corrente tutto sotto controllo
+                  Pagamenti mensili, tutto ordinato e super pulito
                 </p>
               </div>
             </div>
@@ -1084,26 +846,19 @@ export default function App() {
       </header>
 
       <main className="relative max-w-2xl mx-auto px-4 py-5 space-y-4 pb-[max(1.5rem,env(safe-area-inset-bottom))]">
-        <SavingsSection
-          cashCents={cashSavingsCents}
-          bankCents={bankSavingsCents}
-          onChangeCash={setCashSavingsCents}
-          onChangeBank={setBankSavingsCents}
-        />
-
         <AddPaymentForm onAdd={handleAddPayment} />
 
         <section>
           <div className="flex items-center justify-between mb-3">
             <div>
               <h2 className="text-lg font-black tracking-tight text-slate-900">Mesi</h2>
-              <p className="text-sm text-slate-500">Ogni mese parte chiuso, lo apri solo tu</p>
+              <p className="text-sm text-slate-500">Apri il mese e gestisci i pagamenti dentro</p>
             </div>
 
             <button
               onClick={() => loadPayments(true)}
               disabled={isRefreshing}
-              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-50 transition disabled:opacity-50"
+              className="inline-flex items-center gap-2 rounded-2xl border border-slate-200 bg-white/85 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-white transition disabled:opacity-50"
               title="Aggiorna"
             >
               <RefreshIcon className="w-4 h-4" spinning={isRefreshing} />
@@ -1112,16 +867,16 @@ export default function App() {
           </div>
 
           {error && !isLoading ? (
-            <Surface className="p-4 border-red-200 bg-red-50/90">
-              <p className="font-bold text-red-700">Errore di caricamento</p>
-              <p className="text-sm text-red-600 mt-1">{error}</p>
+            <Surface className="p-4 border-rose-200 bg-rose-50/90">
+              <p className="font-bold text-rose-700">Errore di caricamento</p>
+              <p className="text-sm text-rose-600 mt-1">{error}</p>
             </Surface>
           ) : null}
 
           {isLoading ? (
             <Surface className="p-10 flex flex-col items-center justify-center">
-              <div className="w-14 h-14 rounded-2xl bg-sky-50 border border-sky-100 flex items-center justify-center mb-4">
-                <RefreshIcon className="w-7 h-7 text-sky-600" spinning />
+              <div className="w-14 h-14 rounded-2xl bg-fuchsia-50 border border-fuchsia-100 flex items-center justify-center mb-4">
+                <RefreshIcon className="w-7 h-7 text-fuchsia-600" spinning />
               </div>
               <p className="text-slate-700 font-semibold">Caricamento in corso...</p>
               <p className="text-sm text-slate-500 mt-1">Sto preparando i tuoi pagamenti</p>
@@ -1130,13 +885,13 @@ export default function App() {
 
           {!isLoading && !error && payments.length === 0 ? (
             <Surface className="p-8 text-center">
-              <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-sky-50 to-cyan-50 border border-sky-100 text-sky-600 flex items-center justify-center mx-auto mb-4">
+              <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-fuchsia-50 to-sky-50 border border-fuchsia-100 text-fuchsia-600 flex items-center justify-center mx-auto mb-4">
                 <CreditCardIcon className="w-8 h-8" />
               </div>
 
               <p className="text-lg font-black text-slate-900">Nessun pagamento</p>
               <p className="text-sm text-slate-500 mt-1">
-                Aggiungi il tuo primo pagamento e inizia con stile.
+                Aggiungi il tuo primo pagamento per iniziare.
               </p>
             </Surface>
           ) : null}
@@ -1148,8 +903,6 @@ export default function App() {
                   key={monthKey}
                   monthKey={monthKey}
                   payments={monthPayments}
-                  incomeCents={monthIncomes[monthKey] || 0}
-                  onSaveIncome={handleSaveMonthIncome}
                   onDelete={handleDeletePayment}
                   onUpdate={handleUpdatePayment}
                 />

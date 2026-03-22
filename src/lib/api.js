@@ -76,9 +76,8 @@ export async function getPayments() {
  * @param {Object} payment - Payment data
  * @param {string} payment.title - Payment title
  * @param {string} payment.due_date - Due date (YYYY-MM-DD)
- * @param {number} [payment.amount_cents] - Amount in cents
- * @param {string} [payment.notes] - Optional notes
- * @param {boolean} [payment.is_bank_charge] - Direct debit on bank account
+ * @param {number|null} [payment.amount_cents] - Amount in cents
+ * @param {string|null} [payment.notes] - Optional notes
  * @returns {Promise<Object>} Created payment
  */
 export async function createPayment({
@@ -86,7 +85,6 @@ export async function createPayment({
   due_date,
   amount_cents,
   notes,
-  is_bank_charge,
 }) {
   const deviceId = getDeviceId();
 
@@ -98,7 +96,6 @@ export async function createPayment({
       due_date,
       amount_cents: amount_cents ?? null,
       notes: notes || null,
-      is_bank_charge: Boolean(is_bank_charge),
     }),
   });
 }
@@ -110,8 +107,7 @@ export async function createPayment({
  * @param {string} [payment.title] - Payment title
  * @param {string} [payment.due_date] - Due date (YYYY-MM-DD)
  * @param {number|null} [payment.amount_cents] - Amount in cents
- * @param {string} [payment.notes] - Optional notes
- * @param {boolean} [payment.is_bank_charge] - Direct debit on bank account
+ * @param {string|null} [payment.notes] - Optional notes
  * @returns {Promise<Object>} Updated payment
  */
 export async function updatePayment({
@@ -120,7 +116,6 @@ export async function updatePayment({
   due_date,
   amount_cents,
   notes,
-  is_bank_charge,
 }) {
   const deviceId = getDeviceId();
 
@@ -133,7 +128,6 @@ export async function updatePayment({
       due_date,
       amount_cents,
       notes,
-      is_bank_charge,
     }),
   });
 }
