@@ -39,7 +39,7 @@ export default async function handler(request) {
     // POST /api/payments
     if (method === 'POST') {
       const body = await request.json();
-      const { device_id, title, due_date, amount_cents, notes } = body;
+      const { device_id, title, due_date, amount_cents, notes, is_paid } = body;
 
       if (!device_id || !title || !due_date) {
         return errorResponse('device_id, title, and due_date are required', 400);
@@ -71,6 +71,7 @@ export default async function handler(request) {
           due_date,
           amount_cents: normalizedAmount,
           notes: notes || null,
+          is_paid: is_paid === true,
         })
         .select()
         .single();
@@ -86,13 +87,17 @@ export default async function handler(request) {
     // PUT /api/payments
     if (method === 'PUT') {
       const body = await request.json();
-      const { id, device_id, title, due_date, amount_cents, notes } = body;
+      const { id, device_id, title, due_date, amount_cents, notes, is_paid } = body;
 
       if (!id || !device_id) {
         return errorResponse('id and device_id are required', 400);
       }
 
       const updateData = {};
+
+      if (is_paid !== undefined) {
+        updateData.is_paid = is_paid === true;
+      }
 
       if (title !== undefined) {
         const normalizedTitle = String(title).trim();

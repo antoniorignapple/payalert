@@ -1,54 +1,203 @@
 <!doctype html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"
-    />
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
 
-    <!-- PWA / Theme -->
-    <meta name="theme-color" content="#0f172a" />
-    <meta name="description" content="PayAlert - Gestione scadenze pagamenti con notifiche." />
+  <!-- PWA / theme -->
+  <meta name="theme-color" content="#0A0A0B" />
+  <meta name="description" content="PayAlert — gestione scadenze pagamenti con notifiche push." />
 
-    <!-- iOS PWA -->
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="PayAlert" />
-    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+  <!-- iOS PWA: status bar trasparente, l'app passa SOTTO la dynamic island/batteria.
+       Il padding viene gestito via env(safe-area-inset-*) nel CSS. -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="PayAlert" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
 
-    <!-- Disabilita riconoscimento automatico -->
-    <meta name="format-detection" content="telephone=no" />
-    <meta name="format-detection" content="date=no" />
-    <meta name="format-detection" content="address=no" />
-    <meta name="format-detection" content="email=no" />
+  <meta name="format-detection" content="telephone=no, date=no, address=no, email=no" />
 
-    <!-- Icons / Favicon -->
-    <link rel="icon" type="image/x-icon" href="/favicon.ico" />
-    <link rel="icon" type="image/png" sizes="32x32" href="/icon-192.png" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+  <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32.png" />
+  <link rel="manifest" href="/manifest.webmanifest" />
 
-    <!-- Preconnect per performance -->
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,500;0,9..144,600;1,9..144,500;1,9..144,600&family=Manrope:wght@500;600;700;800&display=swap" rel="stylesheet" />
 
-    <!-- Font: Manrope (titoli + UI) -->
-    <link
-      href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;600;700;800&display=swap"
-      rel="stylesheet"
-    />
+  <title>PayAlert</title>
+  <link rel="stylesheet" href="/assets/styles.css" />
+</head>
+<body>
+  <div id="bg-fx"></div>
 
-    <title>PayAlert</title>
+  <!-- ===== DRAWER ===== -->
+  <div id="scrim"></div>
+  <aside id="drawer">
+    <div class="dw-head">
+      <div class="brand">
+        <span class="mark"><img src="/brand-mark.png" alt="PayAlert" width="128" height="128" /></span>
+        <span class="nm">Pay<i>Alert</i></span>
+      </div>
+      <div class="tag">SCADENZE · SEMPRE PUNTUALE</div>
+    </div>
 
-    <!-- Previeni zoom su double-tap iOS -->
-    <style>
-      * { touch-action: manipulation; }
-    </style>
-  </head>
+    <div class="year-nav">
+      <button id="prevYear" aria-label="Anno precedente"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
+      <span class="y" id="yearLbl">2026</span>
+      <button id="nextYear" aria-label="Anno successivo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg></button>
+    </div>
 
-  <body class="bg-slate-950 text-slate-100">
-    <div id="root"></div>
-    <script type="module" src="/src/main.jsx"></script>
-  </body>
+    <div class="months" id="months"></div>
+
+    <div class="dw-foot">
+      <div class="dw-item" id="pushItem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg>
+        <span>Notifiche</span>
+        <span class="badge off" id="pushBadge">Off</span>
+      </div>
+      <div class="dw-item" id="settingsItem">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.6 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.6a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        <span>Impostazioni</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ===== APP ===== -->
+  <div id="app">
+    <header class="topbar">
+      <div class="hamb" id="hamb"><span></span></div>
+      <div class="month-wrap">
+        <div class="month-name" id="monthName"></div>
+        <div class="month-sub" id="monthSub"></div>
+      </div>
+    </header>
+
+    <div class="summary">
+      <div class="lbl">Da pagare questo mese</div>
+      <div class="total" id="sumTotal"><span class="cur">€</span>0,00</div>
+      <div class="meta">
+        <div class="chip"><span class="n" id="sumCount">0</span><span class="t">Totali</span></div>
+        <div class="chip"><span class="n due" id="sumDue">0</span><span class="t">Da pagare</span></div>
+        <div class="chip"><span class="n ok" id="sumPaid">0</span><span class="t">Pagati</span></div>
+      </div>
+      <div class="bar"><i id="sumBar"></i></div>
+    </div>
+
+    <div class="filters">
+      <div class="seg on" data-f="all">Tutti <span class="c" id="filtAllC">0</span></div>
+      <div class="seg" data-f="due">Da pagare <span class="c" id="filtDueC">0</span></div>
+      <div class="seg" data-f="paid">Pagati <span class="c" id="filtPaidC">0</span></div>
+    </div>
+
+    <div class="list" id="list"></div>
+  </div>
+
+  <button class="fab" id="fab" aria-label="Aggiungi pagamento"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg></button>
+
+  <!-- ===== SHEET add/edit ===== -->
+  <div id="sheet-scrim"></div>
+  <div id="sheet">
+    <div class="grab" id="grab"></div>
+    <h2 class="sheet-h" id="sheetHead"><span id="sheetTitle">Nuovo <b>pagamento</b></span></h2>
+
+    <div class="field">
+      <label>Titolo <span class="req">*</span></label>
+      <input class="input" id="fTitle" type="text" placeholder="Es. Affitto, Netflix, Bolletta…" maxlength="80" autocomplete="off" />
+    </div>
+    <div class="row2">
+      <div class="field">
+        <label>Importo</label>
+        <div class="amount-in"><span class="euro">€</span><input class="input" id="fAmount" type="text" inputmode="decimal" placeholder="0,00" /></div>
+      </div>
+      <div class="field">
+        <label>Scadenza <span class="req">*</span></label>
+        <input class="input" id="fDate" type="date" />
+      </div>
+    </div>
+    <div class="field">
+      <label>Note</label>
+      <textarea class="ta" id="fNotes" placeholder="Facoltativo — IBAN, metodo, riferimenti…" maxlength="200"></textarea>
+    </div>
+
+    <div class="sheet-actions">
+      <button class="btn btn-danger" id="btnDelete" style="display:none">Elimina</button>
+      <button class="btn btn-ghost" id="btnCancel">Annulla</button>
+      <button class="btn btn-gold" id="btnSave">Salva</button>
+    </div>
+  </div>
+
+  <!-- ===== SETTINGS sheet ===== -->
+  <div id="set-scrim"></div>
+  <div id="setsheet">
+    <div class="grab" id="setGrab"></div>
+    <h2 class="sheet-h" id="setHead">Impo<b>stazioni</b></h2>
+
+    <div class="set-row">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 8a6 6 0 1 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.94 1.94 0 0 0 3.4 0"/></svg></span>
+      <div class="st"><div class="t1">Notifiche push</div><div class="t2">Promemoria il giorno prima e il giorno della scadenza.</div></div>
+      <div class="act" style="display:flex;gap:8px">
+        <button class="mini-btn gh" id="testBtn" style="display:none">Test</button>
+        <button class="mini-btn gold" id="pushBtn">Attiva</button>
+      </div>
+    </div>
+
+    <div class="set-row" id="installRow" style="display:none">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3m0 12-4-4m4 4 4-4"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/></svg></span>
+      <div class="st"><div class="t1">Installa app</div><div class="t2">Aggiungi PayAlert alla schermata Home.</div></div>
+      <div class="act"><button class="mini-btn gold" id="installBtn">Installa</button></div>
+    </div>
+
+    <div id="iosHint" style="display:none">
+      <div class="ios-hint">Su iPhone/iPad: tocca il pulsante <b>Condividi</b> in Safari, poi <b>“Aggiungi alla schermata Home”</b>. Apri PayAlert dall'icona per ricevere le notifiche.</div>
+    </div>
+
+    <div class="set-row" style="margin-top:6px">
+      <span class="si"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></span>
+      <div class="st"><div class="t1">PayAlert</div><div class="t2" id="verLine">Versione 2.0 · I dati restano su questo dispositivo.</div></div>
+    </div>
+
+    <div class="sheet-actions" style="margin-top:18px">
+      <button class="btn btn-gold" id="setClose">Chiudi</button>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="/assets/app.js"></script>
+  <script>
+    // Service worker + AGGIORNAMENTO AUTOMATICO.
+    // Quando pubblichi una nuova versione su Vercel, al riavvio della PWA
+    // il nuovo service worker viene rilevato, attivato e la pagina si
+    // ricarica da sola con il codice aggiornato.
+    if ("serviceWorker" in navigator) {
+      var refreshing = false;
+      navigator.serviceWorker.addEventListener("controllerchange", function () {
+        if (refreshing) return;
+        refreshing = true;
+        window.location.reload();
+      });
+      window.addEventListener("load", function () {
+        navigator.serviceWorker.register("/sw.js").then(function (reg) {
+          reg.update(); // controlla subito se c'e' una versione nuova
+          // ricontrolla ogni volta che torni sull'app
+          document.addEventListener("visibilitychange", function () {
+            if (document.visibilityState === "visible") reg.update();
+          });
+          reg.addEventListener("updatefound", function () {
+            var nw = reg.installing;
+            if (!nw) return;
+            nw.addEventListener("statechange", function () {
+              // nuova versione pronta e c'e' gia' un SW attivo -> attivala
+              if (nw.state === "installed" && navigator.serviceWorker.controller) {
+                nw.postMessage("skipWaiting");
+              }
+            });
+          });
+        }).catch(function () {});
+      });
+    }
+  </script>
+</body>
 </html>
